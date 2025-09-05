@@ -1,0 +1,13 @@
+# Requirements for lm_studio_test.ipynb
+
+# Core HTTP library for LM Studio API calls
+requests>=2.31.0
+
+# OpenAI SDK for HuggingFace and Groq compatibility
+openai>=1.0.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Google Gemini API
+google-generativeai>=0.8.0
