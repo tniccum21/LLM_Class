@@ -39,7 +39,7 @@ if 'current_index' not in st.session_state:
 # Load the CSV file
 @st.cache_data
 def load_data():
-    csv_path = os.path.join('IT_Tickets', 'dataset-tickets-multi-lang3-4k.csv')
+    csv_path = './IT_Tickets/dataset-tickets-multi-lang3-4k.csv'
     try:
         df = pd.read_csv(csv_path)
         return df
@@ -120,54 +120,70 @@ def main():
             st.session_state.current_index = len(df) - 1
             st.rerun()
     
-    # Display current ticket
+    # Display current ticket in two columns
     st.markdown("---")
     
     current_ticket = df.iloc[st.session_state.current_index]
     
-    # Ticket metadata in columns
-    meta_cols = st.columns(4)
+    # Create two main columns
+    left_col, right_col = st.columns(2, gap="large")
     
-    with meta_cols[0]:
-        if 'type' in df.columns:
-            st.metric("Type", current_ticket.get('type', 'N/A'))
-    
-    with meta_cols[1]:
-        if 'priority' in df.columns:
-            priority = current_ticket.get('priority', 'N/A')
-            color = {'high': '🔴', 'medium': '🟡', 'low': '🟢'}.get(str(priority).lower(), '⚪')
-            st.metric("Priority", f"{color} {priority}")
-    
-    with meta_cols[2]:
-        if 'language' in df.columns:
-            st.metric("Language", current_ticket.get('language', 'N/A'))
-    
-    with meta_cols[3]:
-        if 'queue' in df.columns:
-            st.metric("Queue", current_ticket.get('queue', 'N/A'))
-    
-    # Subject
-    st.markdown("### 📋 Subject")
-    subject_container = st.container()
-    with subject_container:
+    # LEFT COLUMN - Original Data
+    with left_col:
+        st.markdown("### 📄 Original Ticket Data")
+        
+        # Subject at the top
+        st.markdown("#### 📋 Subject")
         st.info(current_ticket.get('subject', 'No subject available'))
-    
-    # Body
-    st.markdown("### 📝 Body")
-    body_container = st.container()
-    with body_container:
+        
+        # Body second
+        st.markdown("#### 📝 Body")
         body_text = current_ticket.get('body', 'No body content available')
-        st.text_area("", value=body_text, height=300, disabled=True, key=f"body_{st.session_state.current_index}")
-    
-    # Additional ticket information (collapsible)
-    with st.expander("📎 Additional Information"):
-        # Display other columns
+        st.text_area("", value=body_text, height=250, disabled=True, key=f"orig_body_{st.session_state.current_index}")
+        
+        # Other fields below
+        st.markdown("#### 📎 Additional Fields")
+        
+        # Get all other columns (excluding subject and body)
         other_cols = [col for col in df.columns if col not in ['subject', 'body']]
         
         for col in other_cols:
             value = current_ticket.get(col, 'N/A')
-            if pd.notna(value) and str(value).strip():
-                st.write(f"**{col.replace('_', ' ').title()}:** {value}")
+            if pd.notna(value):
+                # Special formatting for certain fields
+                if col == 'priority':
+                    color = {'high': '🔴', 'medium': '🟡', 'low': '🟢'}.get(str(value).lower(), '⚪')
+                    st.write(f"**{col.replace('_', ' ').title()}:** {color} {value}")
+                else:
+                    st.write(f"**{col.replace('_', ' ').title()}:** {value}")
+    
+    # RIGHT COLUMN - AI Predictions (blank for now)
+    with right_col:
+        st.markdown("### 🤖 AI Predictions")
+        st.caption("*Fields will be populated by AI in future updates*")
+        
+        # Subject prediction placeholder
+        st.markdown("#### 📋 Subject (AI)")
+        st.text_input("", value="", placeholder="AI will predict subject...", disabled=True, key=f"ai_subject_{st.session_state.current_index}")
+        
+        # Body prediction placeholder
+        st.markdown("#### 📝 Body (AI)")
+        st.text_area("", value="", placeholder="AI will generate response...", height=250, disabled=True, key=f"ai_body_{st.session_state.current_index}")
+        
+        # Other fields predictions
+        st.markdown("#### 📎 Additional Fields (AI)")
+        
+        # Create empty placeholders for all other fields
+        for col in other_cols:
+            field_name = col.replace('_', ' ').title()
+            
+            # Use appropriate input type based on field
+            if col == 'priority':
+                st.selectbox(f"**{field_name}:**", ["", "high", "medium", "low"], disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
+            elif col == 'language':
+                st.selectbox(f"**{field_name}:**", ["", "en", "es", "fr", "de", "ja", "zh", "pt", "it", "ru", "ko"], disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
+            else:
+                st.text_input(f"**{field_name}:**", value="", placeholder=f"AI prediction for {field_name.lower()}...", disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
     
     # Keyboard shortcuts hint
     st.markdown("---")

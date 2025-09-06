@@ -4,12 +4,13 @@ A Streamlit-based interface for reviewing and managing support tickets from a CS
 
 ## Features
 
-- 📋 View ticket subjects and bodies in a clean interface
+- 📋 Two-column layout: Original data vs AI predictions
+- 📄 Left column displays original ticket data with subject and body at top
+- 🤖 Right column prepared for AI-generated predictions (currently blank placeholders)
 - ⬅️➡️ Navigate through tickets with Previous/Next buttons
 - ⏮️⏭️ Jump to first or last ticket quickly
 - 📊 Sidebar statistics showing ticket distribution
 - 🔢 Direct navigation to any ticket number
-- 📎 Expandable section for additional ticket information
 - 🌍 Multi-language ticket support
 
 ## Installation
@@ -35,11 +36,12 @@ streamlit run ticket_triage_app.py
 
 ## Interface Overview
 
-- **Main View**: Displays the current ticket's subject and body
+- **Two-Column Layout**: 
+  - **Left Column**: Original ticket data with subject and body prominently displayed, followed by all other fields
+  - **Right Column**: AI prediction placeholders (ready for future AI integration)
 - **Navigation Bar**: Contains First, Previous, Next, and Last buttons for easy navigation
 - **Sidebar**: Shows total tickets, current position, and ticket statistics
 - **Jump to Ticket**: Enter a specific ticket number to navigate directly
-- **Additional Information**: Expandable section showing all other ticket fields
 
 ## Data Structure
 
