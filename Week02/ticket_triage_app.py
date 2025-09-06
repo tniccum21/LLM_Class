@@ -191,6 +191,8 @@ def main():
         # Add AI Analysis button
         if st.button("🔮 Analyze with AI", type="primary", use_container_width=True):
             with st.spinner("Analyzing ticket..."):
+                
+                # detect the language of the incomming email:
                 # Call the LM Studio function
                 system_prompt = "You are a helpful assistant analyzing support tickets."
                 user_prompt = f"""Analyze the following support request email and return ONLY the language it is written in, 
@@ -212,7 +214,27 @@ def main():
                 ticket_key = f"ticket_{st.session_state.current_index}"
                 # Clean the response and store it as language
                 language_code = ai_response.strip().lower() if ai_response else ""
+
+                # Translate the subject of the email:
+                # Call the LM Studio function
+                system_prompt = "You are a helpful assistant analyzing support tickets."
+                user_prompt = f"""Translate the following email subject line to English, while adapting it to American idioms and phrasing: \n
+                                  ###\n
+                                  Subject: {current_ticket.get('subject', '')}\n
+                                  ###\n
+                                  your response should be simply be the english translation with no other information."""
+                
+                ai_response = call_lm_studio(system_prompt, user_prompt)
+                
+                # Store the response in session state as a dictionary
+                ticket_key = f"ticket_{st.session_state.current_index}"
+                # Clean the response and store it as language
+                translated_subject_line = ai_response.strip().lower() if ai_response else ""
+
+
+
                 st.session_state.ai_predictions[ticket_key] = {
+                    "subject_line": translated_subject_line,
                     "language": language_code,
                     "raw_response": ai_response
                 }
@@ -222,9 +244,10 @@ def main():
         ticket_key = f"ticket_{st.session_state.current_index}"
         ai_response = st.session_state.ai_predictions.get(ticket_key, {})
         
-        # Subject prediction placeholder
+        # Subject prediction - show translated subject if available
         st.markdown("#### 📋 Subject (AI)")
-        st.text_input("", value="", placeholder="AI will predict subject...", disabled=True, key=f"ai_subject_{st.session_state.current_index}")
+        translated_subject = ai_response.get("subject_line", "")
+        st.text_input("", value=translated_subject, placeholder="AI will translate subject...", disabled=True, key=f"ai_subject_{st.session_state.current_index}")
         
         # Body prediction placeholder
         st.markdown("#### 📝 Body (AI)")
