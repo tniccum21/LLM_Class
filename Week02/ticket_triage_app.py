@@ -79,7 +79,7 @@ def call_lm_studio(system_content, user_content):
 
 # Main app
 def main():
-    st.title("🎫 Ticket Triage System")
+    st.title("🎫 Prestige Worldwide - Ticket Triage System")
     st.markdown("Review and manage support tickets efficiently")
     
     # Load data
@@ -193,26 +193,42 @@ def main():
             with st.spinner("Analyzing ticket..."):
                 # Call the LM Studio function
                 system_prompt = "You are a helpful assistant analyzing support tickets."
-                user_prompt = f"Subject: {current_ticket.get('subject', '')}\nBody: {current_ticket.get('body', '')}"
+                user_prompt = f"""Analyze the following support request email and return ONLY the language it is written in, 
+                                  use German=de; \n 
+                                  English=en; : \n
+                                  French=fr; \n
+                                  Portuguese=pt\n
+                                  Spanish=es\n
+                                  Unknown=uk\n
+                                  ###\n
+                                  Subject: {current_ticket.get('subject', '')}\n
+                                  Body: {current_ticket.get('body', '')}\n
+                                  ###\n
+                                  your response should be simply one of [de, en, fr, pt, es], with no additional commentary or charachters"""
                 
                 ai_response = call_lm_studio(system_prompt, user_prompt)
                 
-                # Store the response in session state
+                # Store the response in session state as a dictionary
                 ticket_key = f"ticket_{st.session_state.current_index}"
-                st.session_state.ai_predictions[ticket_key] = ai_response
+                # Clean the response and store it as language
+                language_code = ai_response.strip().lower() if ai_response else ""
+                st.session_state.ai_predictions[ticket_key] = {
+                    "language": language_code,
+                    "raw_response": ai_response
+                }
                 st.success("AI analysis complete!")
         
         # Check if we have predictions for this ticket
         ticket_key = f"ticket_{st.session_state.current_index}"
-        ai_response = st.session_state.ai_predictions.get(ticket_key, "")
+        ai_response = st.session_state.ai_predictions.get(ticket_key, {})
         
         # Subject prediction placeholder
         st.markdown("#### 📋 Subject (AI)")
         st.text_input("", value="", placeholder="AI will predict subject...", disabled=True, key=f"ai_subject_{st.session_state.current_index}")
         
-        # Body prediction - show AI response if available
+        # Body prediction placeholder
         st.markdown("#### 📝 Body (AI)")
-        st.text_area("", value=ai_response, placeholder="AI will generate response...", height=250, disabled=True, key=f"ai_body_{st.session_state.current_index}")
+        st.text_area("", value="", placeholder="AI will generate response...", height=250, disabled=True, key=f"ai_body_{st.session_state.current_index}")
         
         # Other fields predictions
         st.markdown("#### 📎 Additional Fields (AI)")
@@ -225,7 +241,15 @@ def main():
             if col == 'priority':
                 st.selectbox(f"**{field_name}:**", ["", "high", "medium", "low"], disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
             elif col == 'language':
-                st.selectbox(f"**{field_name}:**", ["", "en", "es", "fr", "de", "ja", "zh", "pt", "it", "ru", "ko"], disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
+                # Get the detected language from AI predictions
+                detected_language = ai_response.get("language", "")
+                language_options = ["", "en", "es", "fr", "de", "pt", "uk"]
+                # Set the index to the detected language if it exists in options
+                try:
+                    selected_index = language_options.index(detected_language) if detected_language in language_options else 0
+                except:
+                    selected_index = 0
+                st.selectbox(f"**{field_name}:**", language_options, index=selected_index, disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
             else:
                 st.text_input(f"**{field_name}:**", value="", placeholder=f"AI prediction for {field_name.lower()}...", disabled=True, key=f"ai_{col}_{st.session_state.current_index}")
     
