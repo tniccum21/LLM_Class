@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import os
+import requests
+import json
 
 # Page configuration
 st.set_page_config(
@@ -35,6 +37,8 @@ st.markdown("""
 # Initialize session state
 if 'current_index' not in st.session_state:
     st.session_state.current_index = 0
+if 'ai_predictions' not in st.session_state:
+    st.session_state.ai_predictions = {}
 
 # Load the CSV file
 @st.cache_data
@@ -49,6 +53,29 @@ def load_data():
     except Exception as e:
         st.error(f"Error loading CSV: {str(e)}")
         return None
+
+# Function to call LM Studio LLM
+def call_lm_studio(system_content, user_content):
+    """
+    Basic function to call LM Studio API
+    """
+    url = "http://localhost:1234/v1/chat/completions"
+    
+    payload = {
+        "model": "openai/gpt-oss-20b",
+        "messages": [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ],
+        "max_tokens": 1200,
+        "temperature": 0.3
+    }
+    
+    try:
+        resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
+        return resp.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # Main app
 def main():
@@ -157,18 +184,35 @@ def main():
                 else:
                     st.write(f"**{col.replace('_', ' ').title()}:** {value}")
     
-    # RIGHT COLUMN - AI Predictions (blank for now)
+    # RIGHT COLUMN - AI Predictions
     with right_col:
         st.markdown("### 🤖 AI Predictions")
-        st.caption("*Fields will be populated by AI in future updates*")
+        
+        # Add AI Analysis button
+        if st.button("🔮 Analyze with AI", type="primary", use_container_width=True):
+            with st.spinner("Analyzing ticket..."):
+                # Call the LM Studio function
+                system_prompt = "You are a helpful assistant analyzing support tickets."
+                user_prompt = f"Subject: {current_ticket.get('subject', '')}\nBody: {current_ticket.get('body', '')}"
+                
+                ai_response = call_lm_studio(system_prompt, user_prompt)
+                
+                # Store the response in session state
+                ticket_key = f"ticket_{st.session_state.current_index}"
+                st.session_state.ai_predictions[ticket_key] = ai_response
+                st.success("AI analysis complete!")
+        
+        # Check if we have predictions for this ticket
+        ticket_key = f"ticket_{st.session_state.current_index}"
+        ai_response = st.session_state.ai_predictions.get(ticket_key, "")
         
         # Subject prediction placeholder
         st.markdown("#### 📋 Subject (AI)")
         st.text_input("", value="", placeholder="AI will predict subject...", disabled=True, key=f"ai_subject_{st.session_state.current_index}")
         
-        # Body prediction placeholder
+        # Body prediction - show AI response if available
         st.markdown("#### 📝 Body (AI)")
-        st.text_area("", value="", placeholder="AI will generate response...", height=250, disabled=True, key=f"ai_body_{st.session_state.current_index}")
+        st.text_area("", value=ai_response, placeholder="AI will generate response...", height=250, disabled=True, key=f"ai_body_{st.session_state.current_index}")
         
         # Other fields predictions
         st.markdown("#### 📎 Additional Fields (AI)")
