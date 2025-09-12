@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+Week01/.env
+Week01/.env
 
 # Python
 __pycache__/
@@ -37,3 +39,7 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# Source data that has been cleaned
+Source_files/
+Week03/
