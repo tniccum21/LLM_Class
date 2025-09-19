@@ -3,7 +3,8 @@
 .env.local
 .env.*.local
 Week01/.env
-Week01/.env
+Week02/.env
+Week03/.env
 
 # Python
 __pycache__/
@@ -42,4 +43,6 @@ logs/
 
 # Source data that has been cleaned
 Source_files/
-Week03/
+
+# future classes - hold for git update
+Week04/
