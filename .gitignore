@@ -5,6 +5,9 @@
 Week01/.env
 Week02/.env
 Week03/.env
+Week04/.env
+Week04/secrets.env
+Week05/secrets.env
 
 # Python
 __pycache__/
@@ -45,4 +48,4 @@ logs/
 Source_files/
 
 # future classes - hold for git update
-Week04/
+Week05/

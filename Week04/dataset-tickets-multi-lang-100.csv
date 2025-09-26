@@ -1,0 +1,845 @@
+subject,body,type,queue,priority,language,business_type
+Problema crítico del servidor requiere atención inmediata,Es necesaria una investigación inmediata sobre la interrupción en el servicio de gestión de AWS que está impactando funciones comerciales esenciales.,Incident,Technical Support,high,es,IT Services
+Anfrage zur Verfügbarkeit des Dell XPS 13 9310,"Sehr geehrter Kundenservice,
+
+ich hoffe, diese E-Mail erreicht Sie wohl. Ich schreibe, um mich nach der Verfügbarkeit und den Lieferoptionen für das Dell XPS 13 9310 Ultrabook zu erkundigen. Könnten Sie mir bitte mitteilen, ob dieses Modell derzeit auf Lager ist und die geschätzte Lieferzeit zu meinem Standort? Ich bin sehr daran interessiert, es so schnell wie möglich zu kaufen.
+
+Vielen Dank für Ihre Unterstützung.
+
+Mit freundlichen Grüßen,
+<name>",Request,Customer Service,low,de,Tech Online Store
+Erro na Autocompletação de Código do IntelliJ IDEA,"Prezado Suporte ao Cliente <name>,
+
+Estou escrevendo para trazer à sua atenção um problema recorrente com o recurso de autocompletação de código no IntelliJ IDEA 2024.1. Este problema específico faz com que o aplicativo travar frequentemente durante o desenvolvimento, o que está prejudicando significativamente minha produtividade. Cada vez que tento usar o recurso de autocompletação de código, o software fica sem resposta, levando eventualmente a um travamento. Já tentei os passos comuns de solução de problemas, como reinstalação e aplicação das atualizações mais recentes, mas o problema persiste. Agradeceria sua orientação sobre como resolver esse problema o mais rápido possível. Obrigado pela sua atenção.
+
+Atenciosamente,
+<name>",Incident,Technical Support,high,pt,IT Services
+Urgent Assistance Required: AWS Service,"Dear IT Services Support Team, 
+
+I am reaching out regarding a high-priority ticket related to our AWS Management Service. We are experiencing significant challenges in deploying services and optimizing our cloud infrastructure costs. It is crucial for us to gain clarity and efficient solutions on this matter. 
+
+We have been noticing higher-than-expected expenditure, and the deployment process appears to have several hurdles that prevent smooth operation. As this is affecting our operational efficiency and financial planning, your expert assistance is urgently requested. 
+
+Could you please prioritize this ticket and guide us on the best practices to streamline deployment and manage costs effectively on AWS? Your prompt response will greatly aid in mitigating potential losses and optimizing current systems. 
+
+Thank you for your immediate attention and expertise.
+
+Best regards, 
+
+<name>
+<acc_num>
+<name@example.com>
+<tel_num>",Request,IT Support,high,en,IT Services
+Problème d'affichage de MacBook Air,"Cher équipe de support du magasin en ligne Tech, 
+
+Je vous écris pour attirer votre attention sur un problème que j'ai rencontré avec mon MacBook Air M1 récemment acheté. Bien que l'appareil ait initialement répondu à ma satisfaction, j'ai remarqué que l'écran scintille occasionnellement pendant l'utilisation. Ce léger problème se produit sporadiquement et est quelque peu distrayant, notamment lorsque je me concentre sur des tâches importantes. J'ai vérifié que mon système d'exploitation est à jour et je n'ai pas apporté d'altérations non autorisées à la configuration du système. Malgré mes tentatives de dépannage, telles que la réinitialisation des paramètres d'affichage et l'assurance que tous les logiciels sont à jour, le scintillement persiste. Étant donné la réputation de votre marque pour des dispositifs de haute qualité, j'ai confiance que c'est un problème avec lequel vous pouvez m'assister. J'apprécierais des conseils sur les éventuelles solutions ou s'il serait possible d'organiser une inspection ou un remplacement si nécessaire. Mon achat a été effectué au nom de <name> le <purchase_date>. Je peux fournir le numéro de série de l'appareil si nécessaire. Veuillez m'informer des prochaines étapes que je devrais suivre. Merci pour votre attention rapide à cette affaire. 
+
+Cordialement, 
+
+<name>",Incident,Product Support,low,fr,Tech Online Store
+Urgent: Issue with Zoom Screen Sharing Feature,"Dear Customer Support,
+
+I am experiencing a high-priority incident wherein screen sharing fails during critical business webinar sessions using Zoom version 5.11.0. This issue is disrupting our operations and needs immediate attention.
+
+Could you please address this matter as soon as possible or direct me to someone who can assist?
+
+Thank you for your urgent support.
+
+Best regards,
+
+<name>
+<acc_num>",Incident,Technical Support,high,en,IT Services
+Discrepancia de facturación en Google Workspace,"Estimado equipo de soporte de TI,
+
+Estoy escribiendo para informar un monto de facturación incorrecto en mi suscripción de Google Workspace Business Standard bajo la cuenta <acc_num>. Por favor, revise y ajuste la factura. Espero su pronta respuesta.
+
+Saludos,
+
+<name>",Incident,Billing and Payments,low,es,IT Services
+Service outage resolution requested for ongoing issues,"Dear IT Services Customer Support,
+
+I am writing to express our concern regarding a recent service outage that severely disrupted our regular operations. This was specifically related to the IT Consulting Service provided by your team. The interruption significantly impacted our workflow, causing delays and potential revenue loss.
+
+To prevent similar issues in the future, we are seeking your expertise in developing and implementing comprehensive IT solutions. Considering the critical nature of our operations, it is imperative that we ensure maximum uptime and reliability from all IT-related services.
+
+We appreciate the prompt support and preventive measures your company can offer. It would be highly beneficial to discuss possible solutions that can enhance our system's resilience and reduce vulnerability to unexpected outages.
+
+Moreover, please let us know if there are maintenance services or upgrades that should be scheduled to optimize performance and reliability in our existing infrastructure. Kindly provide us with a detailed proposal at your earliest convenience.
+
+Thank you for your attention to this critical matter. We look forward to your swift action and partnership to effectively resolve these issues.
+
+Sincerely,
+
+<name>
+<tel_num>
+<acc_num>",Change,Service Outages and Maintenance,high,en,IT Services
+Surface Pro 7 Issue,"Dear Tech Online Store Support Team,
+
+I hope this message finds you well. I am writing to bring to your attention a troubling issue I have been experiencing with my Microsoft Surface Pro 7. Recently, I have noticed that the screen flickers intermittently, which has been quite disruptive to my workflow.
+
+I am unsure whether the root cause of the problem is a hardware malfunction or a software glitch, but it has persisted despite attempts to troubleshoot. Could you kindly assist by investigating what might be causing this flickering issue? Are there any known solutions or fixes I might attempt before sending the device for repair?
+
+Your prompt assistance in resolving this matter would be greatly appreciated. Please let me know if any additional information is needed from my side.
+
+Thank you for your attention to this issue.
+
+Best regards,
+
+<name>",Incident,Product Support,medium,en,Tech Online Store
+Problèmes de déploiement avec les ressources AWS,"Cher équipe de support client,
+
+J'espère que ce message vous trouve bien. Je vous contacte pour signaler un problème que nous rencontrons lors du déploiement de ressources utilisant le service de gestion AWS. Le processus de déploiement échoue de manière inattendue, causant des retards significatifs dans nos opérations. Notre équipe dépend fortement de vos services pour maintenir une productivité sans faille, et ce revers s'avère très difficile.
+
+Pourriez-vous s'il vous plaît nous fournir des conseils sur le dépannage de ce problème de déploiement ? Nous avons veillé à ce que toutes les configurations soient réglées conformément aux directives, mais le problème persiste. Toute perspective ou assistance pas à pas pour résoudre cette affaire serait grandement appréciée.
+
+Nous attendons avec impatience votre réponse rapide car cela impacte notre flux de travail. Si nécessaire, n'hésitez pas à me contacter au <tel_num> à votre convenance.
+
+Merci de votre soutien.
+
+Cordialement,
+
+<name>",Problem,IT Support,medium,fr,IT Services
+Request for software development consultation and server admin advice,"Dear Customer Support,
+
+I hope this message finds you well. My name is <name>, and I am reaching out regarding recurring system instability issues we have been experiencing. We are currently subscribed to your IT Consulting Service, and I believe we require a software development consultation and server administration advice to address these problems effectively. Could you please guide us on how to proceed with scheduling a consultation at your earliest convenience? You can reach me via email or contact me at <tel_num>. Your prompt assistance is greatly appreciated, as these issues are affecting our business operations.
+
+Thank you for your attention to this matter.
+
+Best regards,
+
+<name>",Request,Technical Support,medium,en,IT Services
+Unterstützung beim Einrichten des drahtlosen Druckens,"Sehr geehrter Support des Tech Online Stores,
+
+ich benötige Hilfe beim Einrichten meines Epson EcoTank ET-4760 für drahtloses Drucken mit mehreren Geräten zu Hause. Ich freue mich auf Ihre Unterstützung.
+
+Vielen Dank,
+
+<name>",Request,Product Support,high,de,Tech Online Store
+Urgent AWS Deployment Issues,"Dear IT Services Customer Support,
+
+I hope this message finds you well. I am reaching out to request urgent technical assistance with our AWS Management Service. We experienced significant server downtime over the weekend, which is impacting our operations. This issue has caused major disruptions for our team, and we need immediate help to resolve it. Please let us know if there are any specific logs or details you require from our end to expedite the troubleshooting process. Could we schedule a call at the earliest convenience to work through this issue? Your prompt response would be greatly appreciated.
+
+Thank you,
+<name>",Request,Technical Support,medium,en,IT Services
+Solicitud urgente de orientación y solución de problemas,"Estimado soporte al cliente, espero que este mensaje le encuentre bien. Me pongo en contacto para solicitar urgentemente su experiencia en orientación sobre desarrollo de software y solución de problemas del servidor como parte de nuestro actual proyecto de consultoría de TI. Hemos encontrado algunos problemas críticos que están afectando negativamente nuestros plazos del proyecto. Específicamente, nuestro equipo está enfrentando desafíos con la integración del nuevo software con nuestros sistemas existentes, lo que ha llevado a tiempos de inactividad inesperados y retrasos en el rendimiento. Además, ha habido problemas persistentes de conectividad del servidor que no podemos resolver por nuestra cuenta, obstaculizando la entrega fluida de nuestros servicios. Su pronta asistencia en el diagnóstico y rectificación de estos problemas sería inmensamente beneficiosa. Confiamos en su amplia experiencia y destreza técnica para ayudarnos a superar estos obstáculos rápidamente. ¿Podría también organizar una consulta con su desarrollador líder a la mayor brevedad posible? Nuestro objetivo es resolver estos problemas lo más rápido posible para minimizar cualquier retraso adicional en el proyecto y garantizar una experiencia fluida para el cliente. Gracias por su atención inmediata a este asunto. Espero su respuesta rápida. Saludos cordiales, <name>",Request,Technical Support,high,es,IT Consulting Firm
+Probleme mit der drahtlosen Funktion des Epson EcoTank ET-4760,"Hallo Support-Team,
+
+ich habe ein Problem mit meinem Epson EcoTank ET-4760 Drucker. Die drahtlose Druckfunktion funktioniert nicht. Ich habe alle im Benutzerhandbuch empfohlenen Fehlersuchemethoden versucht, aber ohne Erfolg. Können Sie mir bitte eine Anleitung zur Behebung des Problems geben? Ihre Unterstützung wäre sehr geschätzt.
+
+Danke.
+
+Mit freundlichen Grüßen,
+
+<name>
+
+<tel_num>",Incident,Product Support,medium,de,Tech Online Store
+Urgente: Interrupción de red por el router ISR4331,"Estimado equipo de soporte, Estamos experimentando una interrupción de red causada por un router Cisco ISR4331 que no funciona correctamente. Esto requiere una intervención técnica de alta prioridad. Por favor, aborden este problema lo antes posible. Gracias por su asistencia. Saludos, <name>",Incident,IT Support,high,es,IT Services
+Immediate Assistance Required for Network Disruption,"Dear Customer Support,
+
+We are currently experiencing a high-priority incident involving our Cisco Router ISR4331, which is causing significant disruptions to our enterprise network performance. This issue has led to a partial outage affecting several critical operations. We kindly request your immediate attention and expertise to resolve this issue as quickly as possible.
+
+Please provide guidance on the next steps for troubleshooting or confirm the dispatch of a technical team. You may reach me at our direct line: <tel_num> or email at <email_address>.
+
+Thank you for your prompt response.
+
+Best regards,
+
+<name>
+<company_name>",Incident,Service Outages and Maintenance,high,en,IT Services
+Hilfestellung für die Integration von Google Workspace erforderlich,"Sehr geehrtes Kundenserviceteam,
+
+ich hoffe, diese Nachricht erreicht Sie wohl. Ich schreibe, um Unterstützung bei der Einrichtung der Google Workspace-Integration mit unserer bestehenden Unternehmenssoftware zu erbitten. Wir haben kürzlich das Google Workspace Business Standard-Abonnement abgeschlossen und beabsichtigen, dessen Möglichkeiten zu nutzen, um die Produktivität unseres Teams zu steigern und unsere Arbeitsabläufe zu optimieren.
+
+Unser primäres Ziel ist es sicherzustellen, dass unsere aktuellen Unternehmensanwendungen nahtlos mit den Google Workspace-Diensten wie Gmail, Google Drive, Google Calendar und Google Meet integriert sind. Eine reibungslose Übergabe, ohne die laufenden Abläufe zu stören, ist für uns von entscheidender Bedeutung, und deshalb suchen wir Ihre fachkundige Anleitung.
+
+Könnten Sie uns bitte detaillierte Anweisungen geben, wie wir diese Integration effektiv einrichten können? Darüber hinaus wären wir dankbar für Ressourcen oder Best Practices, die unserem IT-Team helfen können, die Unternehmenssoftware-Umgebung effektiv mit den Funktionen von Google Workspace in Einklang zu bringen. Wenn möglich, wäre es vorteilhaft, einen Spezialisten zu konsultieren, der dieses Integrationsprojekt überwachen und unterstützen kann.
+
+Vielen Dank für Ihre Aufmerksamkeit in dieser Angelegenheit, und ich freue mich auf Ihre zeitnahe Antwort. Bitte zögern Sie nicht, mich per E-Mail oder Telefon unter Ihrer frühesten Gelegenheit zu kontaktieren, wenn weitere Informationen benötigt werden.
+
+Mit freundlichen Grüßen,
+
+<name>
+<name>'s Company
+Kontakt Nummer: <tel_num>",Request,Technical Support,low,de,IT Services
+,"Dear Customer Support, 
+
+I hope this message finds you well. I am writing to request a detailed explanation of some unexpected monthly charges for AWS cloud resources as seen on my last bill. The charges seem unaccounted for, and since I utilize the AWS Management Service, it would be helpful for me to understand the breakdown. Would you please help clarify these charges? My account number is <acc_num>. For further correspondence, you can reach me at <nameemail>@domain.com or call me at <tel_num>. Your prompt assistance with this matter is appreciated. 
+
+Thank you. 
+
+Best regards, 
+<name>",Request,Billing and Payments,high,en,IT Services
+Assistance Needed for Chrome Crashes,"Dear Tech Online Store Customer Support, I am writing to inform you that I am experiencing consistent crashes with Google Chrome 102.0 on my Windows 11 laptop. The browser crashes frequently during use, severely impacting my workflow. Could you please investigate and provide proper assistance? Any help in resolving this issue would be greatly appreciated. If you need any additional information, please let me know. Thank you for your support. Best regards, <name>",Problem,Technical Support,low,en,Tech Online Store
+Consulta sobre Servicios de Consultoría en TI,"Estimado Servicio de Atención al Cliente,
+
+Mi nombre es <name>, y estoy interesado en obtener más información sobre sus Servicios de Consultoría en TI, centrándome específicamente en el desarrollo de software y la administración de servidores. Agradecería información detallada sobre los servicios ofrecidos, precios y proceso de compromiso. ¿Podría proporcionarme esta información o direccionarme a un representante que pueda ayudarme con mi consulta?
+
+Gracias por su asistencia.
+
+Atentamente,
+
+<name>
+<tel_num>
+<email_address>",Request,General Inquiry,medium,es,IT Consulting Firm
+,"Sehr geehrtes IT-Support-Team,
+
+ich schreibe, um Ihre Aufmerksamkeit auf ein anhaltendes Problem mit meinem Dell XPS 13 9310 Laptop zu lenken. Ich habe häufiges Flackern des Bildschirms festgestellt, was erhebliche Anzeigeprobleme verursacht und meine täglichen Aufgaben unterbricht. Das Problem scheint intermittierend schlimmer zu werden, was erhebliche Belastungen verursacht, während ich versuche, das Gerät für berufliche und persönliche Aufgaben zu nutzen.
+
+Ich habe versucht, verschiedene Fehlerbehebungsmaßnahmen durchzuführen, wie das Aktualisieren der Anzeigetreiber und das Überprüfen möglicher Hardwareprobleme, aber das Problem besteht weiterhin.
+
+Könnten Sie bitte Anleitungen zu weiteren Fehlerbehebungsmaßnahmen bereitstellen oder eine Prüfung und Reparatur des Laptops arrangieren? Ihre schnelle Unterstützung bei der Behebung dieses Problems zu Ihrem frühestmöglichen Zeitpunkt wäre sehr geschätzt. Bitte zögern Sie nicht, mich unter <tel_num> für weitere Details oder Anfragen zu kontaktieren.
+
+Vielen Dank,
+<name>",Incident,Technical Support,medium,de,IT Services
+,"Dear Customer Care,
+
+I am encountering challenges with activating my Windows 11 Pro software. Even after diligently following the provided guidelines, I am unable to finalize the activation process. My account number is <acc_num>. Would you kindly help me resolve this matter at your earliest convenience? You can contact me at <tel_num>.
+
+Thank you for your attention to this issue.
+
+Sincerely,
+<name>",Problem,Technical Support,medium,en,IT Services
+Google Chrome Extension Issue,"Dear Customer Support, I am experiencing a compatibility issue with Google Chrome version 102.0, affecting its performance and security settings. This issue began after installing an extension from your store. Could you assist in resolving this problem? Your prompt help will be greatly appreciated.\n\nThank you,\n<name>\n<tel_num>\n<email_address>",Request,Product Support,medium,en,Tech Online Store
+,"Sehr geehrtes Kundenserviceteam,
+
+ich wende mich an Sie, um auf eine Verzögerung beim Versand meiner kürzlich aufgegebenen Bestellung eines MacBook Air M1 hinzuweisen. Meine Bestellnummer lautet <order_num>. Könnten Sie mir bitte ein Update zum geschätzten Liefertermin mitteilen?
+
+Mit besten Grüßen,
+<name>",Problem,Billing and Payments,medium,de,Online Store
+Billing Issue with AWS Management Service,"Dear Customer Support,
+
+I hope this message finds you well. I am writing to bring to your attention an issue I have faced regarding incorrect billing charges. After utilizing the AWS Management Service for cloud infrastructure and service optimization, my account, <acc_num>, has been billed erroneously. The charges do not accurately reflect the usage reported and seem significantly higher than anticipated. 
+
+Kindly review my billing details and correct any discrepancies at your earliest convenience. Please let me know if you need any additional information to facilitate a rapid resolution. You can contact me at <email> or <tel_num> for further discussion.
+
+Thank you for your assistance in this matter.
+
+Best regards,
+
+<name>",Problem,Billing and Payments,medium,en,IT Services
+Inquiry About Dell XPS 13 Battery Optimization,"Dear Customer Support, 
+
+I hope this message finds you well. My name is <name> and I recently purchased a Dell XPS 13 9310 from your store. I am reaching out to gather information on optimizing the battery performance for my device, which is running on the Windows 10 system. As you can imagine, ensuring maximum efficiency and longevity of the battery is crucial for my use case. I've noticed that the battery life may not be performing up to the expected standards despite balancing the screen brightness and power settings.
+
+Could you please provide detailed guidance or steps that I can take to improve the battery life? Additionally, information on any software optimizations, firmware updates, or settings adjustments that are recommended by both Dell and Microsoft would be greatly appreciated. If there are any specific tools or diagnostics available from your support team, please let me know how I can access these as well.
+
+Thank you for your assistance on this matter. Looking forward to your expert advice.
+
+Best regards,
+<name>
+Contact: <tel_num>
+Account Number: <acc_num>",Request,Product Support,low,en,Tech Online Store
+Problema recurrente de desconexión de red,"Estimado soporte al cliente,
+
+Espero que este mensaje le llegue en buen estado. Me pongo en contacto con usted para informarle sobre un problema recurrente que estamos enfrentando con desconexiones frecuentes de la red. Después de realizar una investigación exhaustiva, hemos concluido que estas interrupciones se deben a un problema de configuración en nuestro Cisco Router ISR4331, que es esencial para nuestras operaciones de red.
+
+Este problema se manifiesta como una pérdida esporádica de conectividad de red, afectando gravemente tanto nuestras comunicaciones internas como externas. La creciente frecuencia de estas desconexiones se está volviendo cada vez más perjudicial para nuestras operaciones, resultando en una reducción de la productividad y potencialmente obstaculizando nuestra entrega de servicios.
+
+Creemos que la configuración actual del Cisco Router ISR4331 puede no estar adaptada a nuestros requisitos específicos de red, o podría haber un problema subyacente de firmware o compatibilidad. Dado que esta situación está más allá de nuestra área de experiencia, solicitamos respetuosamente su pronta asistencia para diagnosticar y proponer una solución a este problema.
+
+Por favor, háganos saber tan pronto como sea posible cómo podemos abordar este asunto de manera eficiente. Si necesita contactarme para obtener más información o diagnósticos remotos, no dude en comunicarse directamente conmigo.
+
+Gracias por su rápida atención a este importante problema.
+
+Atentamente,
+
+<name>
+<email_address>
+<tel_num>",Incident,Technical Support,high,es,IT Services
+Problemas intermitentes de exibição após atualização de firmware,"Caro Suporte ao Cliente,
+
+ Estou entrando em contato para relatar um problema com meu Samsung QLED QN90A que comprei em sua loja. Após a recente atualização de firmware, estou enfrentando problemas intermitentes de exibição. A tela às vezes pisca e às vezes perde o sinal completamente, o que prejudica significativamente minha experiência de visualização.
+
+ Esses problemas começaram a ocorrer imediatamente após a atualização de firmware, sugerindo uma possível causa. Tentei solucionar o problema verificando todas as conexões e reiniciando a TV para as configurações de fábrica, mas o problema persiste.
+
+ Você poderia me fornecer orientações sobre como resolver isso ou me informar os próximos passos? Se um retrocesso de firmware ou uma correção estiver disponível, isso seria extremamente útil para recuperar a funcionalidade total da minha TV.
+
+ Obrigado antecipadamente pela sua assistência. Aguardo uma solução rápida.
+
+ Atenciosamente,
+
+ <name>
+ <email>
+ <tel_num>",Problem,Product Support,high,pt,Tech Online Store
+Assistance Required: Wireless Setup Issue,"Dear Tech Online Store Customer Support, I'm requesting assistance with setting up the wireless connection for my Compact All-in-One color printer, the HP DeskJet 3755. I am unable to proceed with the current instructions provided. Could you guide me through the necessary steps? Thank you for your help. Sincerely, <name>.",Request,Product Support,low,en,Tech Online Store
+Challenge with Instance Launch,Concern with service implementation.,Problem,Customer Service,medium,en,IT Services
+Consulta sobre las características de la pantalla táctil del Microsoft Surface Pro 7,"Estimado cliente del servicio de atención al cliente de Tech Online Store,
+
+Espero que este mensaje te encuentre bien. Estoy escribiendo para solicitar asistencia para tomar una decisión informada sobre la compra del Microsoft Surface Pro 7. Estoy particularmente interesado en sus características de pantalla táctil y rendimiento general. ¿Podría proporcionar información detallada sobre cómo funciona la pantalla táctil, especialmente en términos de capacidad de respuesta y precisión? Además, agradecería cualquier información sobre el rendimiento general del dispositivo en varias aplicaciones.
+
+Gracias por tu ayuda.
+
+Atentamente,
+
+<name>",Request,Customer Service,medium,es,Tech Online Store
+Asistencia y Optimización para la Infraestructura de AWS,"Estimado Soporte al Cliente, necesitamos ayuda experta para configurar y optimizar nuestra oferta de Servicio de Gestión de AWS para un cliente. Nuestro objetivo es mejorar el rendimiento y reducir costos. Esperamos su pronta asistencia. Atentamente, <name>",Request,IT Support,medium,es,IT Consulting Firm
+Fehler bei der Code-Vervollständigung in IntelliJ IDEA,"Sehr geehrter <name> Kundenservice,
+
+ich schreibe, um Ihre Aufmerksamkeit auf ein wiederkehrendes Problem mit der Code-Vervollständigung in IntelliJ IDEA 2024.1 zu lenken. Dieses bestimmte Problem führt häufig dazu, dass die Anwendung während der Entwicklung abstürzt, was meine Produktivität erheblich beeinträchtigt. Jedes Mal, wenn ich versuche, die Code-Vervollständigungsfunktion zu verwenden, wird die Software unresponsiv und führt schließlich zu einem Absturz. Ich habe die üblichen Fehlerbehebungsmaßnahmen wie die Neuinstallation und das Anwenden der neuesten Updates ausprobiert, aber das Problem besteht weiterhin. Ich würde Ihre Anleitung zur Lösung dieses Problems so schnell wie möglich schätzen. Vielen Dank für Ihre Aufmerksamkeit.
+
+Mit freundlichen Grüßen,
+<name>",Incident,Technical Support,high,de,IT Services
+Assistance Required: AWS Storage Costs and Performance,"Dear IT Services Customer Support,
+
+I hope this message finds you well. I am reaching out to request assistance regarding the optimization of AWS storage costs and the enhancement of performance for our cloud infrastructure. As a customer using your AWS Management Service, we have been experiencing challenges in managing our storage costs effectively while ensuring optimal performance across our systems.
+
+During our recent financial review, it became evident that a significant portion of our budget is being allocated toward storage solutions, which has raised concerns about cost-efficiency. We believe that there may be opportunities to optimize our AWS configurations to better manage these expenses, but we need expert guidance to identify and implement these improvements.
+
+Moreover, we have noticed some performance bottlenecks that are impacting the operational efficiency of our cloud infrastructure. Our goal is to enhance the performance without incurring additional costs and to ensure seamless operations and accessibility of our data.
+
+We kindly request a consultation with your experienced team to explore potential strategies and solutions that could assist us in lowering our storage expenditures and boosting infrastructure performance. Please let us know your availability for an initial discussion, and we can provide further details about our current setup.
+
+Thank you for your attention to this matter. We are looking forward to your prompt response and guidance. Your support is invaluable to us in achieving our objectives.
+
+Best regards,
+
+<name>
+
+<name>
+Company: <Company_Name>
+Account Number: <acc_num>
+Contact number: <tel_num>",Request,Technical Support,medium,en,IT Services
+Urgent Database Outage,"Dear Customer Support Team, we are experiencing a severe database outage affecting MySQL 8.0.30. Critical client data has become inaccessible. We urgently require your support to resolve this issue. Please prioritize our request. Contact <name> at <tel_num> for additional details. Thank you for your immediate attention.",Incident,Technical Support,high,en,IT Services
+Synchronisationsprobleme,"Sehr geehrtes Kundendienstteam,
+
+Ich wende mich an Sie, um meine Bedenken bezüglich eines Problems zu äußern, das ich mit der Google Workspace Business Standard-Suite habe. Genauer gesagt habe ich Schwierigkeiten mit der E-Mail-Synchronisierungsfunktion, wenn ich Gmail zusammen mit anderen kollaborativen Anwendungen nutze, die Teil der Google Workspace-Sammlung sind. Dieses Problem führt offenbar zu erheblichen Verzögerungen bei den Aktualisierungen auf verschiedenen Plattformen, was sporadische Unterbrechungen in meinem Arbeitsablauf verursacht.
+
+Ich habe festgestellt, dass E-Mails, die über Gmail gesendet oder empfangen werden, nicht in Echtzeit innerhalb der vernetzten Tools wie Google Kalender oder Google Drive aktualisiert werden. Diese Verzögerung führt häufig zu verpassten Aktualisierungen bezüglich wichtiger Ereignisse und Dateiänderungen. Bei meinen Versuchen, dieses Problem zu beheben, habe ich meine Internetverbindung überprüft und bestätigt, dass auf allen Geräten automatische Updates aktiviert sind. Leider haben diese Schritte das Problem nicht gelöst.
+
+Angesichts der wesentlichen Rolle, die diese Suite in meinen täglichen Aktivitäten spielt, wäre jede Unterstützung bei der Lösung dieses Problems von immensem Wert. Gibt es aktuelle Bedenken oder aktuelle Dienstunterbrechungen, die zu diesem Problem beitragen könnten? Oder gibt es bestimmte Einstellungen, die ich ändern muss, um die Effizienz der Synchronisierung zu verbessern?
+
+Ich freue mich auf Ihren Rat und eine schnelle Lösung dieses Problems. Vielen Dank für Ihre Unterstützung und Ihr Verständnis.
+
+Mit freundlichen Grüßen,
+
+<name>
+E-Mail: <email>
+Telefon: <tel_num>
+Kontonummer: <acc_num>",Problem,Technical Support,medium,de,Software Development Company
+Urgent: Issues with AWS Management Service,"Dear Customer Support, I am writing to report a high priority issue with the AWS Management Service. We are experiencing significant challenges with our cloud deployment processes and cost management. This issue is affecting our business operations and requires immediate attention. Please advise on the necessary steps to resolve these problems effectively. I can be reached at <tel_num> for further discussion. I look forward to your swift response. Thank you. Sincerely, <name>",Incident,Technical Support,high,en,IT Services
+Urgent Consultation Request for Critical IT Issues,"Dear IT Services Support Team, I hope this message finds you well. My name is <name> and I am currently experiencing critical issues with our server administration, which are significantly impacting our operations. We rely heavily on your IT Consulting Service for our ongoing technical needs. Therefore, we urgently need your expert assistance to resolve these issues as quickly as possible. Time is of the essence because our operations have come to a standstill. Please contact us at your earliest convenience, either via email or phone at <tel_num>. The swift resolution of this situation is imperative to minimize any further disruption to our business. Thank you for your prompt attention to this matter. Kind regards, <name>",Request,Customer Service,high,en,IT Services
+Request to Update Billing Information for Compliance,"Dear Customer Support,
+
+I am writing to request an update to our billing information for the IT Consulting Service. Due to our new corporate payment policies, it's crucial that our records remain compliant. Currently, our account <acc_num> might require modifications to align with recent policy changes. Please let us know the necessary steps or documents required to proceed. Feel free to contact me at <tel_num> if further clarification is needed. Your prompt assistance with this update will be greatly appreciated.
+
+Thank you,
+
+<name>",Change,Billing and Payments,medium,en,IT Consulting Firm
+Anfrage zur IT-Beratung,"Sehr geehrter IT-Dienste-Kundenservice, 
+
+Ich schreibe, um mich nach den Angeboten des IT-Beratungsdienstes zu erkundigen und wie sie meinen allgemeinen Geschäftsbedürfnissen zugutekommen können. Insbesondere möchte ich mehr über die Palette der Dienstleistungen erfahren, die Sie im Rahmen der IT-Beratung anbieten, und wie diese an die Bedürfnisse meines Unternehmens angepasst werden können. Es wäre hilfreich, detaillierte Informationen über Ihren Ansatz zur Integration von Technologielösungen und alle Erfolgsgeschichten zu erhalten, die greifbare Geschäftsentwicklungen demonstrieren. 
+
+Darüber hinaus bitten wir um Einblicke in die Kostenstrukturen und wie der Wert Ihres Dienstes die Investition rechtfertigt. Jegliche Broschüren oder Ressourcen, die Sie teilen könnten, wären sehr willkommen. 
+
+Vielen Dank für Ihre Unterstützung. 
+
+Mit freundlichen Grüßen, 
+<name> 
+<acc_num>",Incident,General Inquiry,medium,de,IT Services
+Urgent : Besoin d'aide pour une installation ratée - Windows 11 Pro,"Bonjour service clientèle, j'ai éprouvé un échec lors de l'installation en passant à Windows 11 Pro. Merci de me donner des directives pour remédier à cette situation rapidement. Mon numéro de téléphone est <tel_num>. Merci, <name>",Incident,Technical Support,low,fr,IT Services
+Asistencia Urgente Requerida para Problemas de Conectividad del Router Cisco ISR4331,"Estimado Soporte al Cliente,
+
+Estoy experimentando problemas de conectividad con nuestro router Cisco ISR4331, lo que está afectando el rendimiento de nuestra red empresarial y las comunicaciones seguras. Este ha sido un problema urgente, que afecta las operaciones diarias. ¿Podrían por favor brindar asistencia urgente para resolver este asunto lo antes posible? Su experiencia y acción rápida en esta situación serían muy apreciadas.
+
+Gracias de antemano por su cooperación.
+
+Saludos cordiales,
+
+<name>",Incident,Technical Support,high,es,IT Services
+Recurring Crash in Visual Studio Code 1.70 Issue,"Dear Customer Support,
+
+I am writing to bring to your attention a recurring issue I am facing with Visual Studio Code version 1.70. Recently, I have encountered persistent crashes whenever I attempt to open files with specific extensions. These crashes significantly disrupt my workflow and delay critical projects.
+
+The problem appears to occur regardless of the file size or the specific tasks performed within Visual Studio Code. I have attempted several common troubleshooting steps, such as disabling extensions, clearing the application cache, and even reinstalling Visual Studio Code. Unfortunately, these efforts have not resolved the issue.
+
+Given the impact this has had on my productivity, I urge you to investigate this matter and provide a suitable resolution. Please let me know if there are additional logs or diagnostics that I can furnish to assist in addressing this problem. I am hoping for a swift resolution to continue using your otherwise excellent software without hindrance.
+
+Thank you for your attention to this matter.
+
+Best regards,
+
+<name>",Incident,Product Support,medium,en,Software Development Company
+Urgent: Jira Software 8.20 Outage,"Dear Customer Support Team, 
+
+I am writing to report a critical issue we are experiencing with the Jira Software, version 8.20, used for managing our project tasks and tracking. The system is down, impacting our team's ability to view and update project statuses across multiple departments. This outage is causing significant disruptions in our workflow, hindering communication and collaboration among team members.
+
+We urge you to look into this issue immediately and provide a timeline for when the system will be operational again. Our projects heavily depend on Jira for task assignment and progress tracking, making this an urgent matter.
+
+Thank you for your prompt attention to this pressing issue.
+
+Best regards,
+
+<name>
+
+<tel_num> 
+
+<acc_num>",Problem,Technical Support,high,en,Software Development Company
+Pedido de Assistência para Administração de Servidores,"Prezado Suporte ao Cliente de Serviços de TI,
+
+Espero que esta mensagem o encontre bem. Estou escrevendo para solicitar assistência adicional com a administração do servidor para melhorar a eficiência e o desempenho de nossos sistemas atuais. Acreditamos que aproveitar seus serviços de consultoria pode nos ajudar a alcançar essas melhorias e abordar quaisquer desafios existentes que estamos enfrentando.
+
+Nosso principal objetivo é otimizar as operações do servidor para apoiar nosso crescimento e garantir a confiabilidade de nossa infraestrutura de TI. Após revisar seus Serviços de Consultoria de TI, estamos confiantes de que a experiência de sua equipe pode fornecer insights e soluções valiosas adaptadas às nossas necessidades específicas.
+
+Poderíamos, por favor, agendar uma consulta com um de seus especialistas na sua primeira conveniência? Estamos ansiosos para discutir estratégias potenciais, planos de serviço e quaisquer recomendações que você possa ter. Aguardamos ansiosamente o refinamento de nossos sistemas e a sua adaptação às melhores práticas.
+
+Obrigado pela sua atenção a este pedido. Agradecemos sua assistência e estamos animados com a possibilidade de colaborar com sua equipe.
+
+Atenciosamente,
+
+<name>
+<position>
+<company>
+<tel_num>
+<email>",Request,Customer Service,medium,pt,IT Services
+,"Prezado <name>,
+
+Sentimos muito ao saber sobre o atraso na entrega do seu Apple Watch Series 7 GPS. Compreendemos sua preocupação e estamos atualmente investigando o problema. Esperamos que seu pacote chegue em breve. Pedimos desculpas por quaisquer transtornos que isso possa ter ocasionado e agradecemos sua compreensão. Se você tiver mais dúvidas, entre em contato conosco pelo <tel_num> ou responda este e-mail.
+
+Agradecemos por escolher nossa loja online!
+
+Cordialmente,
+Equipe de Atendimento ao Cliente",Request,Technical Support,high,pt,Online Store
+Dringend: Verbindungs- und Leistungsproblem,"Sehr geehrter Kundendienst, 
+
+ich schreibe, um ein sofortiges Problem bezüglich der sicheren Verbindung und Leistung zu melden, das unsere Unternehmensabläufe während der Geschäftszeiten kritisch beeinträchtigt. Wir sind auf den Cisco Router ISR4331 als Kernkomponente unserer IT-Infrastruktur angewiesen, und kürzliche Störungen haben unsere Fähigkeit zur Aufrechterhaltung der funktionalen Verbindung und Systemleistung erheblich beeinträchtigt. Die häufigen Ausfälle und Verzögerungen haben nicht nur interne Prozesse, sondern auch unsere Servicebereitstellung an Kunden betroffen. Dieses Problem erfordert schnelle Aufmerksamkeit, um die Fehlersuche und -behebung zu erleichtern. Wir bitten um die sofortige Unterstützung Ihres Teams bei der Diagnose und Behebung des Problems. Vielen Dank für Ihre sofortige Unterstützung. 
+
+Mit freundlichen Grüßen, 
+<name> 
+<position> 
+<company> 
+<tel_num>",Incident,Technical Support,high,de,IT Services
+Network Slow Connectivity Issue Reported with Cisco Router ISR4331 Device,"Hello,
+
+I am writing to report an issue with network connectivity that seems to be affecting our internet speed. Several users have experienced slow connectivity, and after some initial troubleshooting, it appears that the problem might be related to the configuration of our Cisco Router model ISR4331. We suspect that a misconfiguration or hardware fault in this router is limiting network performance. Please advise on the necessary steps to resolve this matter, or if further details are needed for diagnosing the potential configuration issue. Thank you for your prompt assistance.
+
+Best regards,
+<name>",Incident,Technical Support,medium,en,IT Services
+Assistance de facturation requise,"Cher équipe de support client,
+
+J'espère que ce message vous trouve bien. Je vous contacte pour demander de l'assistance concernant un ajustement de facturation lié à notre utilisation récente du service de gestion AWS, fourni par votre entreprise de services informatiques réputée. Je représente <Company> et nous avons un compte sous le numéro <acc_num> qui est associé à nos opérations d'infrastructure AWS en cours.
+
+Après avoir examiné notre utilisation et le relevé de facturation correspondant au dernier trimestre, nous avons remarqué certaines incohérences que nous aimerions clarifier. Au cours du dernier trimestre, notre service de gestion AWS a été utilisé pour améliorer divers aspects de notre infrastructure opérationnelle, mais la facturation semble plus élevée que prévu au départ.
+
+Ce que j'apprécierais, c'est une révision complète des charges liées à notre compte. En particulier, la facturation reflète des charges qui n'ont pas été discutées ou prédites dans notre correspondance précédente concernant les taux d'utilisation et les dépenses associées. Mon équipe a effectué un audit interne et a trouvé des différences entre les projections et les montants facturés dans la documentation de facturation fournie par vous le <date>.
+
+Il serait extrêmement bénéfique de pouvoir organiser un détail des éléments facturés, accompagné de métriques d'utilisation détaillées, et une explication écrite pour chaque charge où des incohérences ont été notées. De plus, j'aimerais demander s'il existe des remises en cours ou des mécanismes de facturation qui conviendraient mieux à nos habitudes d'utilisation mais qui n'ont pas été appliqués à notre compte. Votre avis sur toute option disponible pour des ajustements de facturation dans le cadre de l'accord de service actuel serait très apprécié.
+
+Pour une résolution rapide de cette affaire, je suis disponible pour des discussions supplémentaires à votre convenance. N'hésitez pas à me contacter directement par e-mail ou à mon numéro de téléphone, <tel_num>, à tout moment pendant les heures de bureau. Alternativement, mon collègue <name> peut être contacté en mon absence pour toute clarification nécessaire.
+
+Merci d'avance pour votre attention à cette affaire. J'anticipe vos suggestions et espère résoudre cette incohérence dans un délai raisonnable. Dans l'attente de votre réponse rapide.
+
+Cordialement,
+
+<name>
+<Position>
+<Company>
+<Address>
+<Contact Information>",Request,Billing and Payments,medium,fr,IT Services
+Issue with Wireless Printing Setup,"Dear Customer Support,
+
+I am experiencing an issue with my HP DeskJet 3755. The wireless setup works, but color printing isn't functioning correctly. Kindly assist in resolving this problem.
+
+Thank you,
+<name>
+
+Contact Number: <tel_num>",Incident,Product Support,medium,en,Tech Online Store
+Überprüfung der Serverkonfiguration erforderlich,"Sehr geehrter IT-Service-Support,
+
+unser Kunde, <name>, hat Unterbrechungen bei seinen Kollaborationstools. Wir glauben, dass die Lösung möglicherweise in den Serverkonfigurationseinstellungen liegt. Wir bitten um eine gründliche Überprüfung der Konfiguration des IT- Beratungsdienstes, um dieses Problem umgehend zu lösen. Bitte beraten Sie uns über den besten Handlungsweg und stellen Sie alle notwendigen Anweisungen zur Verfügung.
+
+Danke,
+<name>
+<tel_num>",Problem,IT Support,high,de,IT Services
+Gmail-Integrationsproblem,"Sehr geehrter Kundenservice,
+
+ich schreibe Ihnen, um Ihre Unterstützung hinsichtlich eines Problems zu suchen, das wir mit der Gmail-Integration in unserem Google Workspace Business Standard-Konto haben. Unser Team ist stark auf diese Integration für eine nahtlose Kommunikation angewiesen. In letzter Zeit haben wir jedoch bedeutende Störungen festgestellt, die die E-Mail-Funktionalität beeinträchtigen.
+
+Dies ist besonders problematisch, da wir auf integrierte Funktionen für unsere täglichen Abläufe angewiesen sind. Wir haben erste Schritte zur Fehlersuche unternommen, jedoch tritt das Problem weiterhin auf. Es hat die Produktivität und Effizienz der Kommunikation im Team beeinträchtigt.
+
+Könnten Sie uns bitte zu den nächsten Schritten beraten, um dies zu lösen? Wenn es ein bestimmtes Teammitglied gibt, das wir kontaktieren können oder wenn Sie zusätzliche Details benötigen, lassen Sie es uns bitte wissen.
+
+Vielen Dank für Ihre umgehende Aufmerksamkeit in dieser Angelegenheit.
+
+Mit freundlichen Grüßen,
+<Name>",Request,IT Support,medium,de,IT Services
+Inquiry on MacBook Air M1 Details,"Dear Customer Support Team,
+
+I hope this message finds you well. I have recently acquired a MacBook Air M1 from Tech Online Store, and I am seeking detailed information on its usage and some initial troubleshooting steps. Although the device functions well overall, I am a newcomer to the Mac ecosystem, and it would be beneficial to have a more comprehensive understanding of navigating and optimizing its features efficiently.
+
+Specifically, I would appreciate guidance on managing system settings, employing energy-saving modes efficiently, and backing up data securely. Additionally, any pointers on software installations and common troubleshooting methods for minor issues would be immensely helpful. My MacBook Air's serial number is <acc_num>.
+
+Understanding these aspects will enhance my experience and make the most of the investment. If available, please direct me to any online resources, guides, or tutorials that may complement the information provided. Should you require more details from me, feel free to contact me at the earliest convenience.
+
+Thank you for your assistance.
+
+Best regards,
+
+<name>",Request,Customer Service,low,en,Tech Online Store
+Request for changes in Jira user permissions setup,"Dear Customer Support Team,
+
+I hope this message finds you well. I am writing to request assistance in modifying the user permissions setup within our Jira project management software, specifically version 8.20. My name is <name>, and I am the project manager at <company_name>, overseeing the project installations and configurations for our team.
+
+Currently, we are encountering a few challenges with the permissions in our Jira setup. We have recently expanded our team and brought in a few new members whose roles do not seem to align perfectly with our existing permissions configuration. This has led to some difficulties in terms of task allocations and access rights, hindering our workflow efficiency.
+
+We would appreciate it if you could provide guidance on how to adjust these permissions to better fit our current team structure. In particular, it would be beneficial if new hires' roles could be set up with a more appropriate permission level concerning EEF access and task management. I believe a reassessment of our current permission schemes could help streamline our processes and prevent further access issues.
+
+Could you please advise us on the steps necessary to adjust these settings appropriately, or if there is a preferred onboarding procedure for aligning permission settings with role updates? Additionally, if there are templates or documentation available to assist us, we would be most grateful to receive those.
+
+Thank you very much for your attention to this matter, and I look forward to your prompt response at your earliest convenience.
+
+Warm regards,
+
+<name>
+<company_name>
+<tel_num>
+<acc_num>",Change,Technical Support,medium,en,Software Development Company
+Dringend: AWS Management Service ausgefallen,"Sehr geehrter IT-Service-Support,
+
+ich schreibe, um ein kritisches Problem mit dem AWS Management Service zu melden, das anscheinend ausgefallen ist. Diese Störung beeinträchtigt den Zugriff auf wichtige Infrastrukturen und verursacht erhebliche Störungen in unseren Betriebsabläufen. Schnelles Handeln ist erforderlich, um dieses Problem zu lösen und die Auswirkungen auf unsere Dienste zu minimieren.
+
+Könnten Sie bitte ein Update zum Status dieses Problems und einen möglichen Zeitrahmen für die Lösung bereitstellen? Ihre Unterstützung wird dringend benötigt, um die Funktionalität des Dienstes wiederherzustellen.
+
+Vielen Dank für Ihre schnelle Aufmerksamkeit in dieser Angelegenheit.
+
+Mit freundlichen Grüßen,
+
+<name>",Incident,Technical Support,high,de,IT Services
+Anfrage zum Rückgabeprozess für Drucker,"Hallo, ich habe Probleme mit der drahtlosen Verbindung zu meinem HP DeskJet 3755 Drucker und möchte ihn zurückgeben. Könnten Sie mir bitte beim Rückgabeprozess behilflich sein? Ich schätze Ihre Unterstützung. Vielen Dank. Mit freundlichen Grüßen, <name>",Request,Returns and Exchanges,medium,de,Tech Online Store
+Issue with HP DeskJet 3755 Printer,"Dear Customer Support,
+
+I hope this message finds you well. I am reaching out to report an issue with my recent purchase from your store, the HP DeskJet 3755 wireless all-in-one printer. Since I started using it, the printer has been frequently jamming paper during the return processing, causing a significant disruption to my printing tasks.
+
+I have followed all the troubleshooting steps provided in the manual, such as checking for any obstructions and ensuring that the paper is properly aligned, but unfortunately, the problem persists. This issue is concerning, considering the printer is brand new and within the warranty period.
+
+Could you please advise on the necessary steps to resolve this malfunction? I am hoping for either a replacement or a repair solution at your earliest convenience. My account number is <acc_num>. I am eager to resolve this matter swiftly and continue utilizing the excellent services that your store is known for.
+
+Thank you for your attention to this matter and I look forward to your prompt response.
+
+Best regards,
+<name>",Incident,Returns and Exchanges,high,en,Tech Online Store
+,"Dear Tech Online Store Support Team, 
+
+I am writing to seek assistance with a persistent issue I am facing with Adobe Photoshop 2024 purchased from your store, order number <order_num>. The software currently experiences significant delays during loading, impacting my workflow negatively. Upon launching the application, it stalls at the initialization screen for several minutes, which is quite concerning and not what I expect from a newly released software version.
+
+I have ensured my system meets all the software requirements, and I have installed all available updates both for Adobe Photoshop and my operating system, yet the problem persists. I have also tried reinstalling the software, clearing cache files, and checking for conflicting applications, following the usual troubleshooting steps provided online. Unfortunately, these actions have not resolved the issue.
+
+Could you provide any guidance or additional troubleshooting steps that may help me resolve this situation? Any insights or solutions your team could offer would be greatly appreciated. Additionally, I would appreciate a confirmation on the software's compatibility with recent updates which might be contributing to this problem.
+
+Thank you for your time and assistance.
+
+Best regards, 
+<name>",Request,Product Support,low,en,Tech Online Store
+,"Hello,
+
+Could you please check availability and pricing for the MacBook Air M1, both online and in-store? Looking forward to your reply. Thanks!
+
+Best regards,
+<name>",Request,Customer Service,low,en,Tech Online Store
+Request for Billing Correction on Subscription,"Dear Tech Online Store Customer Support,
+
+I hope this message finds you well. I'm writing to express a concern regarding a recent billing issue I experienced with my Google Workspace Business Standard subscription under account number <acc_num>. It appears that I have been incorrectly charged for a service I did not sign up for, and I would like to seek a refund or an adjustment to my account to rectify this issue.
+
+On my invoice dated <invoice_date>, I noticed an unexpected charge for the Google Workspace Business Standard, which surprised me as I neither request this service nor have any requirement for it at this time. I have checked all my account settings and confirmed that there was no such subscription authorized from my end.
+
+I kindly ask for your immediate assistance in addressing this billing error. Please review the related transaction in your system to verify the inaccuracy. A prompt refund of the incorrect charge or an adjustment on my account would be highly appreciated.
+
+For your reference, my account details are as follows: Name: <name>, Phone number: <tel_num>. I would also appreciate if you could keep me updated about the status of this inquiry.
+
+Thank you for your prompt attention to this matter. I look forward to your resolution.
+
+Sincerely,
+<name>",Incident,Billing and Payments,medium,en,Tech Online Store
+Sofort: Zugangsprobleme mit dem IT-Ticketsystem,Ich benötige dringende Hilfe!,Incident,IT Support,low,de,IT Services
+Solicitud Urgente para Modificación de Ticket de Jira,"Estimado Soporte al Cliente,
+
+Espero que este mensaje le encuentre bien. Me estoy poniendo en contacto con una solicitud urgente para modificar la configuración de categorización del ticket en nuestro Jira Software 8.20 para mejorar la gestión del proyecto. Esta modificación tiene alta prioridad y mejorará significativamente el flujo de trabajo de nuestro equipo. Por favor, advise sobre cómo pueden asistirme para agilizar este proceso.
+
+Gracias por su atención inmediata.
+
+Atentamente,
+<name>
+<acc_num>
+<tel_num>",Change,Technical Support,high,es,Software Development Company
+Urgente: Relato de Falha na Bateria do MacBook Air M1 Adquirido na Loja Virtual,"Prezado Atendimento ao Cliente,<br><br>Recentemente adquiri um MacBook Air M1 em sua loja virtual e estou enfrentando sérios problemas com a bateria. Ela se esgota de forma extremamente rápida. Por favor, me avisem sobre os passos que devo seguir para realizar uma substituição ou um conserto.<br><br>Atenciosamente,<br><nome>",Problem,Returns and Exchanges,medium,pt,Online Store
+,"Estimado equipo de soporte al cliente,
+
+Les escribo para llamar su urgente atención sobre un problema continuo que estamos enfrentando con nuestros servidores orientados al cliente. Nuestra organización, <name> Company, está experimentando problemas significativos de inactividad, lo que afecta directamente nuestras operaciones y nuestra capacidad para ofrecer servicios a nuestros clientes. Dado que este problema está relacionado con su Servicio de Consultoría de TI, necesitamos apoyo inmediato de su equipo para restaurar la funcionalidad completa.
+
+Nuestra evaluación indica que el problema está más allá de nuestro control y experiencia directa, por lo que su intervención es crucial. Es imperativo que el problema sea diagnosticado y resuelto con prontitud para minimizar el impacto en la continuidad del negocio y la satisfacción del cliente. Agradeceríamos que pudieran escalar esto al equipo técnico relevante con urgencia y coordinar una resolución inmediata.
+
+Por favor, prioricen este asunto y háganos saber los pasos que debemos seguir de nuestra parte para una resolución eficiente. Mientras tanto, amablemente proporciónenos un cronograma estimado de cuándo podemos esperar la reconciliación total de los servicios.
+
+Gracias por su atención urgente a este asunto crítico.
+
+Saludos cordiales,
+
+<name>
+<tel_num>
+<email>",Incident,Technical Support,high,es,IT Consulting Firm
+Hilfe bei AWS-Abrechnungsfragen benötigt,"Hallo, unser Kunde, <name>, hat nach der kürzlichen Bereitstellung von durch den AWS Management Service verwalteten Diensten Abrechnungsunregelmäßigkeiten festgestellt. Wir benötigen Unterstützung bei der zeitnahen Behebung dieser Unstimmigkeiten. Bitte überprüfen Sie die angehängten Details zu den Unregelmäßigkeiten und kontaktieren Sie uns für weitere Informationen. Bitte wenden Sie sich an unseren Account Manager, <name>, unter <tel_num> oder beziehen Sie sich auf <acc_num>, wenn Sie dieses Problem ansprechen. Ihre schnelle Aufmerksamkeit für dieses Anliegen wird sehr geschätzt. Vielen Dank für Ihre Unterstützung. Mit freundlichen Grüßen, <name>",Incident,IT Support,medium,de,IT Services
+Urgent: Router Down,"Dear customer support,
+
+Our router, Cisco ISR4331, has experienced a critical software failure, causing network outages. Diagnostics confirmed the issue. We request immediate replacement or repair to restore network functionality as soon as possible.
+
+Best,
+<name> 
+<company_name>
+<acc_num>",Incident,Service Outages and Maintenance,high,en,IT Services
+Urgent AWS Configuration Issue Detected,"Dear IT Services Support Team,
+
+I am writing to urgently bring to your attention a critical issue we are experiencing with our AWS Management Service. It seems there is a misconfiguration in the AWS server settings, which is causing significant downtime for our operations. This problem is affecting our ability to deploy applications and services efficiently, and it is imperative that a solution be found and implemented as soon as possible.
+
+Several of our operations have already been disrupted, leading to a substantial impact on our productivity and potential losses. I kindly request your immediate attention to resolve this server misconfiguration. Additionally, we need an analysis of the associated costs linked to this downtime to better understand its financial implications on our end.
+
+If it involves a simple configuration fix, guidance on rectifying these settings would be greatly appreciated. However, if it necessitates a deeper examination, please dispatch a technician to assist us on-site at the earliest convenience.
+
+Please connect the relevant specialists who can assist us in restoring the system's functionality and ensure our systems are secured against future occurrences. Your prompt action on this issue is vital to reduce further downtime and financial impact.
+
+Thank you for your immediate attention to this pressing matter. Please feel free to reach me at my direct line, <tel_num>, should you require additional information or clarification.
+
+Looking forward to a swift resolution.
+
+Best regards,
+
+<name>
+Account Number: <acc_num>",Incident,Technical Support,high,en,IT Services
+Dringende Unterstützung für die AWS-Problembehebung erforderlich,"Sehr geehrtes IT Services Kunden Support Team, ich hoffe, diese Nachricht erreicht Sie wohl. Ich schreibe Ihnen, um dringend Unterstützung bei einem kritischen Problem zu bitten, das wir mit dem AWS Management Service haben. Derzeit hat unser Team erhebliche Schwierigkeiten bei der Bereitstellung von AWS-Ressourcen, was zu umfassenden Ausfallzeiten geführt hat, die unsere Geschäftsabläufe schwer beeinträchtigen. Die Unfähigkeit, Ressourcen nahtlos bereitzustellen, hat nicht nur unser tägliches Funktionieren behindert, sondern auch erhebliche Kostenfolgen zur Folge gehabt. Wie Sie sich vorstellen können, führt eine Ausfallzeit in unseren Systemen zu verzögerten Projektlieferungen und beeinträchtigt unsere Serviceverpflichtungen gegenüber unseren Kunden. Wir haben mehrere Umgehungslösungen versucht, konnten jedoch noch keine erfolgreiche Lösung finden. Dieses Anliegen ist dringend und erfordert eine sofortige Lösung. Angesichts des erheblichen Einflusses auf finanzielle und operationale Aspekte wären wir dankbar, wenn Ihr Team uns schnelle und effiziente Unterstützung bieten könnte. Bitte lassen Sie mich wissen, welche spezifischen Informationen Sie von uns benötigen, um den Lösungsprozess zu beschleunigen. Unsere Kontonummer ist <acc_num>, und falls erforderlich, kann ich direkt unter <tel_num> für weitere Informationen oder Koordination erreicht werden. Ich freue mich auf Ihre sofortige Antwort. Vielen Dank im Voraus für Ihre Aufmerksamkeit und Unterstützung. Mit freundlichen Grüßen, <name>",Problem,Customer Service,high,de,IT Services
+,"Dear Customer Support Team,
+
+I am writing to report an issue with the JavaScript React App Development Service. After the recent update, our user interface has been crashing consistently, which has significantly impacted our frontend operations. This issue needs urgent resolution to restore full functionality. We understand that software updates are critical, and we appreciate your team's efforts, but this malfunction has affected our productivity adversely.
+
+Could you please look into this matter at the earliest? We would greatly appreciate guidance or any immediate recommendations on possible workarounds until a fix can be applied.
+
+Thank you for your prompt attention to this urgent matter.
+
+Kind regards,
+
+<name>
+<tel_num>
+<email>",Problem,Technical Support,high,en,Software Development Company
+,"Dear Customer Support Team,
+
+I hope this message finds you well. I am writing to bring to your attention an urgent issue regarding our <name> account, registered under the account number <acc_num>, which has been experiencing significant network interruptions with the Cisco Router ISR4331. These disruptions have been impacting our enterprise applications, resulting in a loss of connectivity that adversely affects our daily operations.
+
+This particular Cisco Router is integral to our IT infrastructure, serving as the backbone of our network connectivity. Unfortunately, the problem has persisted despite several troubleshooting attempts, including resetting the router, checking connections, and ensuring firmware is up to date. These network interruptions not only hindered productivity but also compromised the quality of services we deliver to our clients.
+
+We chose the Cisco Router ISR4331 for its high-option features and reliability, which is why this interruption is notably out of character for its performance standards. I would appreciate it if your team could prioritize analyzing this issue and provide guidance on remedies or replacements if necessary. Could you please confirm if there are any known issues with this model that might be causing these connectivity problems? Alternatively, if a hands-on inspection is advisable, we would be open to scheduling a consultation at your earliest convenience.
+
+I look forward to your prompt response, as maintaining seamless network operations is key to our continued success.
+
+Thank you for your attention to this matter.
+
+Best regards,
+
+<name>
+
+Contact: <tel_num>",Incident,Technical Support,high,en,IT Consulting Firm
+Assistência Necessária para Integração do Jira Software,"Prezado Time de Suporte ao Cliente,
+
+Espero que esta mensagem o encontre bem. Estou entrando em contato a respeito de um ticket que diz respeito a problemas que temos encontrado com nossas configurações de quadro Scrum na versão 8.20 do Jira Software. Temos enfrentado dificuldades consideráveis para integrar nossos fluxos de gerenciamento de projetos de maneira suave. Apesar de nossos esforços para configurar os quadros de acordo com nossos requisitos, certas funções não parecem funcionar como esperado. Isso interrompeu nosso fluxo de trabalho, afetando a produtividade.
+
+Estamos buscando seu aconselhamento especializado para nos ajudar a resolver esse problema. Especificamente, precisamos de orientação sobre configurações ideais para uma integração de gerenciamento de projetos sem fricções. Se possível, eu apreciaria um guia passo a passo ou recomendações sobre as melhores práticas para garantir que nossa configuração esteja perfeitamente alinhada com os recursos mais recentes no Jira Software 8.20.
+
+Obrigado pela sua atenção a este assunto, e aguardo sua resposta rápida.
+
+Atenciosamente,
+<name>",Request,Technical Support,high,pt,Software Development Company
+Inquiry on React App Development,"Dear IT Services customer support, I am seeking information regarding your JavaScript React App Development Service. Specifically, I need cost estimates and details on customization options for UI enhancement. Please provide detailed insights at your earliest. Thank you, <name>, <acc_num>",Request,Sales and Pre-Sales,medium,en,IT Services
+Exchange Request for Malfunctioning Dell XPS 13,"Dear Tech Online Store Customer Support,
+
+I hope this message finds you well. I am writing to request an exchange for my recently purchased Dell XPS 13 9310. Unfortunately, the device's display was malfunctioning right out of the box, which has been quite disappointing. My order number is <order_num>, and it was delivered on <delivery_date>.
+
+I believe I am eligible for an exchange as per your store’s policy. Please advise on how to proceed with this process. I am eager to receive a fully functioning replacement.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+
+<name>
+
+<email>
+
+<tel_num>",Change,Returns and Exchanges,medium,en,Tech Online Store
+,"Sehr geehrter Tech Online Store Support,
+
+ich habe Probleme beim Zugriff auf Google Drive in meinem Google Workspace Business Standard-Konto. Jedes Mal, wenn ich versuche, mich anzumelden, erhalte ich eine unerwartete Fehlermeldung. Dieses Problem trat plötzlich auf und unterbricht meinen Arbeitsfluss. Ich bitte um Ihre Unterstützung, um dieses Problem so schnell wie möglich zu lösen. Meine Kontodaten sind wie folgt: Name: <name>, Telefonnummer: <tel_num>, Kontonummer: <acc_num>. Bitte lassen Sie mich wissen, ob Sie weitere Informationen benötigen.
+
+Vielen Dank für Ihre schnelle Bearbeitung dieses Anliegens.
+
+Mit freundlichen Grüßen,
+<name>",Incident,Sales and Pre-Sales,medium,de,Tech Online Store
+Intermittent Connectivity Issues,"Dear IT Services Support Team,
+
+I'm writing to report intermittent connectivity issues we're experiencing with AWS services that are impacting our overall cloud infrastructure performance and reliability. This concerns the AWS Management Service. We have observed these issues for the past week, and they are affecting our operational efficiency. We kindly request your assistance in diagnosing and resolving the problem at your earliest convenience. Your prompt response will be highly appreciated. Thank you.
+
+Best regards,
+<name>
+
+Contact: <tel_num>
+Account: <acc_num>",Incident,Technical Support,high,en,IT Services
+High Priority Incident: Immediate AWS Deployment Resolution Needed,"Dear Customer Support, we are experiencing significant issues with the AWS Management Service impacting deployment and infrastructure. This requires immediate resolution to maintain our operational continuity. Quick assistance would be greatly appreciated. Thank you.",Incident,Technical Support,high,en,IT Services
+Server Performance Feedback Request,"Dear Customer Support,
+
+I hope this message finds you well. I am writing to request feedback on the server performance and cost-efficiency concerning our ongoing IT consulting project adjustments. Our client, <name>, has expressed concerns regarding the current state and would like to explore improvements or alternatives to ensure optimal results. Kindly provide us with detailed insights addressing these concerns as soon as possible.
+
+Additionally, please also include relevant data points specific to our affected product category: IT Consulting Service. Your prompt response will greatly assist in aligning our proposals with the client's expectations.
+
+Thank you for your attention and support.
+
+Best regards,
+
+<name>",Request,Customer Service,low,en,IT Services
+,"Cher support client,
+
+J'espère que ce message vous trouve en bonne santé. Je vous écris pour demander de l'aide concernant l'installation et l'activation d'Adobe Photoshop 2024 sur mon nouvel appareil. J'ai récemment acheté ce logiciel dans votre boutique en ligne Tech mais je rencontre des difficultés pour le faire fonctionner.
+
+Le processus d'installation atteint un certain point et se fige, provoquant un message d'erreur que je ne parviens pas à déchiffrer. De plus, j'ai tenté de l'activer en utilisant mon compte existant associé à mon email <name>@domain.com, mais la clé d'activation semble être non reconnue.
+
+Pourriez-vous s'il vous plaît fournir des instructions détaillées sur la façon de résoudre ces problèmes ? Si nécessaire, je suis disponible pour une session d'assistance à distance à un moment convenable. Mon numéro de référence de commande est <acc_num>.
+
+Merci de votre attention rapide à cette affaire. J'attends vos conseils avec impatience pour pouvoir utiliser Adobe Photoshop 2024 efficacement. Si vous avez besoin de me joindre, mon numéro de contact est <tel_num>.
+
+Cordialement,
+
+<name>",Request,Customer Service,high,fr,Tech Online Store
+Urgent IT Consulting Service Request,"Dear IT Services Support,
+
+I am writing to express a high priority request for IT service consulting regarding our ticket system and server administration assistance. Our IT Consulting Service has encountered multiple issues that need immediate attention. 
+
+Firstly, our ticketing system is currently experiencing delays and interruptions, which are impacting productivity significantly. Additionally, there are several server management concerns that our team is unable to resolve without expert guidance.
+
+Please treat this request with the urgency it requires. We look forward to a prompt response and hope for immediate assistance to address these critical issues.
+
+Thank you for your quick attention.
+
+Best regards,
+
+<name>
+<company>
+Contact: <tel_num>
+Account: <acc_num>",Request,IT Support,high,en,IT Services
+Urgente: Problema con la configuración de la impresora HP LaserJet Pro M15w,"Estimado departamento de atención al cliente, me encuentro teniendo dificultades con la configuración de mi impresora HP LaserJet Pro M15w. No se está conectando como se esperaba. Agradecería su orientación para solucionar este inconveniente. Muchas gracias, <name>, <tel_num>, <acc_num>.",Incident,Product Support,low,es,Online Store
+Urgent Deployment Errors,"Dear Customer Support,
+
+I hope this message finds you well. I am writing to bring to your urgent attention a critical issue we are experiencing with our AWS infrastructure managed via your AWS Management Service. Recently, we've encountered deployment errors that have unfortunately resulted in significant application downtime. This is adversely affecting our business operations and needs immediate resolution.
+
+Despite our continuous efforts to troubleshoot, the root cause of these deployment errors remains elusive. Our development team has identified that the errors primarily occur during routine updates and deployments. Given the critical nature of this issue, we urgently request your expert intervention to diagnose and resolve the underlying problems swiftly.
+
+Please advise us on the next steps and prioritize a support session with your technical team. You may reach me at <tel_num> or via email at <name>@example.com. Our account number with your service is <acc_num> for your reference. We highly appreciate your timely assistance and responsiveness to this urgent matter.
+
+Thank you for your prompt attention.
+
+Kind Regards,
+
+<name>
+<Position>
+<Company Name>",Incident,Technical Support,high,en,IT Services
+Urgente: Soporte para router con mal funcionamiento,"Hola Soporte al Cliente,
+
+Nuestro router Cisco ISR4331 está experimentando un mal funcionamiento repentino, causando importantes interrupciones en la red en todo el sistema. Este problema es crítico y requiere su intervención técnica inmediata. Sospechamos que actualizar el firmware del router podría restaurar su funcionalidad normal. Le rogamos que acelere el proceso para resolver estas interrupciones y restaurar nuestros servicios a la mayor brevedad posible. Dependemos en gran medida de un servicio continuo y sin interrupciones, y apreciamos su rápida asistencia.
+
+Atentamente,
+<name>
+<tel_num>",Incident,Technical Support,high,es,IT Services
+Issues with Slack connection affecting team communication today,"Channels are inaccessible, and messages cannot be sent.",Incident,Technical Support,high,en,IT Services
+Delivery Problem with Samsung Galaxy S21 Ultra,"I am facing an issue with the delivery of my recent order for the Samsung Galaxy S21 Ultra. Although the anticipated delivery date has passed, my package has not yet arrived. My order number is <ord_num>. I would appreciate your help in resolving this matter at your earliest convenience. Thank you.",Request,Returns and Exchanges,high,en,Online Store
+Connectivity Issues with HP DeskJet 3755 Printer,"Dear Customer Support, I'm experiencing wireless connectivity problems with my HP DeskJet 3755 printer. I've tried troubleshooting but no success. Could you help resolve it?",Incident,Product Support,high,en,Tech Online Store
+Urgent Technical Support Needed,"Dear Support Team,
+
+I hope this message reaches you in excellent spirits. I am reaching out to seek urgent assistance concerning several critical software development issues that we are currently encountering. Our organization at <name>'s company relies on your IT Consulting Services, and the prevailing problems are leading to significant disruptions in our productivity and workflow.
+
+A number of important concerns have arisen that require immediate attention to prevent any further problems. Considering the seriousness of these issues, I kindly request that you give our case top priority and provide guidance or a solution at your earliest convenience. Our reliance on your services underscores the necessity of their constant functionality to ensure the seamless operation of our activities.
+
+Please let me know the best way to proceed or if you require additional details from our end to help speed up the resolution process. You can also contact me directly at <tel_num> during business hours if there’s a need for urgent conversations.
+
+Thank you for your prompt attention to this matter. I eagerly await your timely response and a solution that will effectively help us overcome these challenges.
+
+Sincerely,
+
+<name>
+<name>'s Company
+<acc_num>",Request,Technical Support,high,en,IT Consulting Firm
+Urgent: Keyboard Issue,"Hello, I'm facing issues attaching my detachable keyboard to my Surface Pro 7. Please assist.",Request,IT Support,medium,en,Tech Online Store
+Discrepância de Faturamento no Google Workspace,"Caro Time de Suporte de TI,
+
+Estou escrevendo para relatar um valor de faturamento incorreto na minha assinatura do Google Workspace Business Standard sob a conta <acc_num>. Por favor, revise e ajuste a fatura. Aguardando sua pronta resposta.
+
+Atenciosamente,
+
+<name>",Incident,Billing and Payments,low,pt,IT Services
+Inquiry about Dell XPS 13 9310 issues,"Hello Customer Support,
+
+I am writing to seek assistance with a screen flickering issue I've been experiencing with my Dell XPS 13 9310 Ultrabook. The product seems to have developed this problem recently, and it is causing significant inconvenience, especially during work. I've checked for driver updates and ensured all system updates are installed, but unfortunately, the issue persists. Could you please provide guidance on possible solutions or steps I can take to rectify this? If necessary, I am prepared to provide additional details such as purchase receipt or technical logs. I would appreciate your prompt support in resolving this matter. Thank you for your attention.
+
+Best regards,
+
+<name>",Request,Product Support,medium,en,Tech Online Store
+Problème urgent avec le service d'application React,"Cher support client,
+
+J'espère que ce message vous trouve en bonne santé. Je vous écris pour attirer votre attention sur un problème urgent que nous rencontrons avec la réactivité de l'interface utilisateur du service de développement d'application React JavaScript que nous avons utilisé. Malheureusement, l'application ne répond actuellement pas comme prévu, ce qui impacte considérablement nos opérations.
+
+Nous avons d'abord remarqué ce problème le 15 octobre et avons tenté plusieurs étapes de dépannage, y compris la vérification des mises à jour, le vidage du cache et le redémarrage de l'application. Cependant, ces mesures n'ont pas résolu le problème.
+
+Étant donné que notre produit repose fortement sur des interactions fluides de l'interface utilisateur pour une expérience utilisateur optimale, il est crucial que ce problème soit résolu rapidement. Nous croyons qu'il pourrait s'agir d'un bogue lié à la performance et nous apprécierions votre attention immédiate sur cette affaire.
+
+Les délais de livraison de notre projet client sont serrés, et nous espérons que vous comprenez l'urgence de notre demande. Veuillez nous tenir informés de la rapidité avec laquelle ce problème peut être résolu ou si des informations supplémentaires sont nécessaires de notre part.
+
+Merci d'avance pour votre assistance et dans l'attente de votre réponse rapide.
+
+Cordialement,
+<name>
+<company>",Problem,IT Support,medium,fr,IT Services
+Problème de clignotement de l'écran sur le Samsung Galaxy S21 Ultra acheté sur votre site internet - Assistance urgente nécessaire,"Bonjour service client,
+
+J'éprouve un souci de clignotement de l'écran avec mon Samsung Galaxy S21 Ultra que j'ai acquis via votre site internet. Pourriez-vous me guider sur les étapes à suivre pour remédier à ce problème ?
+
+Bien à vous,
+<name>",Request,Product Support,high,fr,Online Store
+Problème de connectivité AWS urgent,"Nous rencontrons des problèmes de connectivité avec le service de gestion AWS, ce qui entraîne un temps d'arrêt du site Web du client. Une résolution immédiate est nécessaire. Veuillez donner la priorité à cet incident de haute priorité. Numéro de compte : <acc_num>. Merci, <name>.",Incident,Technical Support,high,fr,IT Services
+Billing discrepancy - Overcharged for IT consultation,"Dear Customer Support, I noticed a discrepancy in my recent bill for the IT Consulting Service. I was overcharged for the server administration setup consultation. Please review my account and rectify this issue at your earliest convenience. Regards, <name>",Incident,Billing and Payments,high,en,IT Services
+Problem mit der Touchscreen-Reaktionsfähigkeit,"Hallo Kundenserviceteam,
+
+ich hoffe, diese Nachricht erreicht Sie wohl. Ein Kunde, <name>, hat sich bei uns bezüglich eines Reaktionsproblemen mit seinem Microsoft Surface Pro 7 gemeldet. Bitte sehen Sie sich diese Angelegenheit an und geben Sie Ratschläge zu den Schritten, die sie unternehmen sollten, um das Problem zu lösen.
+
+Danke.",Incident,Product Support,medium,de,Tech Online Store
+Frequent Database Downtime Issues,"Dear Customer Support Team,
+
+I am writing to bring to your attention a recurring problem with my MySQL 8.0.30 server, which is experiencing frequent downtimes. This issue significantly affects the reliability and performance of our operations. We rely heavily on this database for crucial activities, hence it’s imperative to address this matter urgently.
+
+We have attempted preliminary troubleshooting efforts as per the resources available on your website but have not achieved the desired stability. The server outages have had a noticeable impact on our data processing speed and operational efficiency.
+
+Could you please assist us in investigating further and identify any underlying issues that may be causing these disruptions? We believe that your expertise is crucial in diagnosing the root cause and implementing a sustainable solution.
+
+I appreciate your prompt attention to this matter and look forward to your guidance on how to proceed.
+
+Thank you,
+
+<name> 
+Account Number: <acc_num>
+Contact: <tel_num>
+Email: <email>",Incident,Technical Support,high,en,IT Consulting Firm
+Assistance Required: AWS Cost Optimization and Deployment Issues,"Dear Customer Support Team, 
+
+I hope this message finds you well. My name is <name> and I am reaching out on behalf of our organization for some urgent assistance. We have been experiencing significant challenges related to AWS cost optimization and encountering frequent cloud service deployment failures within our infrastructure. We believe these issues are largely linked to the services managed by AWS Management Service. 
+
+Despite our continued efforts to optimize costs by adjusting our usage patterns and monitoring resource usage diligently, our AWS expenditure remains unmanageable. We have followed the best practice guidelines provided by AWS but have observed no tangible improvements in our billing. Therefore, we deem it essential to seek your specialized assistance on this matter. A comprehensive cost optimization review tailored to our usage is necessary, as there may be aspects we may have overlooked. 
+
+In addition, the persistent deployment failures have impeded our operations, leading to downtime that affects our service delivery to clients. Our internal IT team has attempted numerous troubleshooting measures but these issues recur frequently. Any guidance or solutions that your team can offer would be highly appreciated to ensure seamless cloud service deployment in the future. 
+
+Please let us know how we can schedule a consultation with your experts at your earliest convenience. You may reach me directly via email or my phone at <tel_num>. 
+
+Thank you for your prompt attention to this matter. 
+
+Best regards, 
+
+<name> 
+<acc_num> 
+Organization <org_name>",Request,Technical Support,high,en,IT Consulting Firm
+"Anfrage zur Garantieabwicklung für das Lenovo IdeaPad 5, das in Ihrem Onlineshop erstanden wurde","Sehr geehrter Kundenservice,<br><br>ich habe vor kurzem ein Lenovo IdeaPad 5 in Ihrem Onlineshop erworben und habe Schwierigkeiten, die eine Bearbeitung der Garantie notwendig machen. Bitte unterstützen Sie mich dabei, dieses Anliegen so rasch wie möglich zu klären.<br><br>Mit freundlichen Grüßen,<br><name><br>Kundennummer: <acc_num><br>Telefonnummer: <tel_num>",Incident,Product Support,medium,de,Online Store
+Urgente: Problema de inatividade do Serviço de Gerenciamento da AWS,"Prezado time de suporte ao cliente,
+
+Estou escrevendo para informar sobre um problema com seu Serviço de Gerenciamento da AWS, que recentemente enfrentou inatividade não planejada. Essa interrupção impactou significativamente o acesso dos clientes ao servidor virtual. Precisamos de assistência imediata para resolver o problema e garantir que não ocorram mais interrupções. Por favor, priorize a restauração da funcionalidade e mantenha-nos atualizados sobre seu progresso. Dependemos muito do seu serviço, e tais incidentes afetam criticamente nossas operações. Ação rápida seria apreciada. Entre em contato comigo pelo <tel_num> para mais discussões.
+
+Obrigado,
+
+<name>",Incident,Service Outages and Maintenance,medium,pt,IT Services
