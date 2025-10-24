@@ -48,4 +48,6 @@ logs/
 Source_files/
 
 # future classes - hold for git update
-Week05/
+# Week05/
+Week05/chroma_ticket_db/
+Week05/ticket_rag_system backup.ipynb
