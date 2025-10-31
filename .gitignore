@@ -32,6 +32,11 @@ build/
 *~
 .DS_Store
 
+# Office temporary files
+~$*.pptx
+~$*.xlsx
+~$*.docx
+
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb_checkpoints/
