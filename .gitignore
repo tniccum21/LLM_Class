@@ -8,6 +8,7 @@ Week03/.env
 Week04/.env
 Week04/secrets.env
 Week05/secrets.env
+Week06/secrets.env
 
 # Python
 __pycache__/
