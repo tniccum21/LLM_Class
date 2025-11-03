@@ -1,0 +1,29 @@
+# Week07 - Intelligent Support Ticket Assistant
+# Python dependencies for RAG system with Streamlit
+
+# Core Framework
+streamlit>=1.30.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# LangChain Ecosystem
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.20
+langchain-chroma>=0.1.0
+
+# Vector Database & Embeddings
+chromadb>=0.4.22
+sentence-transformers>=2.3.0
+
+# LLM Integration
+openai>=1.10.0
+requests>=2.31.0
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# Additional Dependencies
+typing-extensions>=4.9.0
