@@ -18,10 +18,10 @@ import pandas as pd
 from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema.output_parser import StrOutputParser
-from langchain.schema.runnable import RunnableLambda
-from langchain.schema import Document
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
+from langchain_core.documents import Document
 from sentence_transformers import CrossEncoder
 
 from config import AppConfig
