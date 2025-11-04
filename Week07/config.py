@@ -57,6 +57,7 @@ class AppConfig:
 
     # ===== RAG Mode Configuration =====
     rag_mode: str = 'strict'  # 'strict' or 'augmented'
+    retriever_type: str = 'standard'  # 'standard', 'multiquery', or 'mmr'
 
     # ===== UI Configuration =====
     show_references: bool = True
@@ -89,6 +90,10 @@ class AppConfig:
         # Validate RAG mode
         if self.rag_mode not in ['strict', 'augmented']:
             raise ValueError(f"Invalid rag_mode: {self.rag_mode}. Must be 'strict' or 'augmented'")
+
+        # Validate retriever type
+        if self.retriever_type not in ['standard', 'multiquery', 'mmr']:
+            raise ValueError(f"Invalid retriever_type: {self.retriever_type}. Must be 'standard', 'multiquery', or 'mmr'")
 
         # Validate and resolve CSV path
         csv_file = Path(self.csv_path)
@@ -173,6 +178,7 @@ Guidelines:
                 'timeout': self.timeout,
             },
             'rag_mode': self.rag_mode,
+            'retriever_type': self.retriever_type,
             'ui_options': {
                 'show_references': self.show_references,
                 'show_metrics': self.show_metrics,

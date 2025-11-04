@@ -22,9 +22,11 @@ st.set_page_config(
 
 
 @st.cache_resource
-def load_pipeline():
+def load_pipeline(rag_mode='strict', retriever_type='standard'):
     """Load and initialize RAG pipeline (cached for performance)"""
     config = get_config()
+    config.rag_mode = rag_mode
+    config.retriever_type = retriever_type
     pipeline = RAGPipeline(config)
     pipeline.initialize()
     return pipeline, config
@@ -56,20 +58,55 @@ def render_input_panel():
 
     st.subheader("⚙️ Options")
 
-    rag_mode = st.radio(
-        "RAG Mode",
-        options=['strict', 'augmented'],
-        format_func=lambda x: {
-            'strict': '🔒 Strict (Context Only)',
-            'augmented': '🔓 Augmented (+ LLM Knowledge)'
-        }[x],
-        help="Strict: Answer only from historical tickets | Augmented: Supplement with LLM knowledge"
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+        rag_mode = st.radio(
+            "RAG Mode",
+            options=['strict', 'augmented'],
+            format_func=lambda x: {
+                'strict': '🔒 Strict (Context Only)',
+                'augmented': '🔓 Augmented (+ LLM Knowledge)'
+            }[x],
+            help="Strict: Answer only from historical tickets | Augmented: Supplement with LLM knowledge"
+        )
+
+    with col2:
+        retriever_type = st.radio(
+            "Retriever Type",
+            options=['standard', 'multiquery', 'mmr'],
+            format_func=lambda x: {
+                'standard': '📍 Standard',
+                'multiquery': '🔄 MultiQuery',
+                'mmr': '🎯 MMR (Diverse)'
+            }[x],
+            help="Standard: Single query | MultiQuery: Multiple query variations | MMR: Balances relevance with diversity"
+        )
 
     show_references = st.checkbox(
         "Show Reference Tickets",
         value=True,
         help="Display the historical tickets used to generate the answer"
+    )
+
+    st.subheader("🎛️ Retrieval Parameters")
+
+    top_k_initial = st.slider(
+        "Tickets Retrieved (Vector Search)",
+        min_value=5,
+        max_value=50,
+        value=20,
+        step=5,
+        help="Number of tickets to retrieve from vector database before re-ranking"
+    )
+
+    top_k_reranked = st.slider(
+        "Tickets Selected (After Re-ranking)",
+        min_value=1,
+        max_value=min(15, top_k_initial),
+        value=min(5, top_k_initial),
+        step=1,
+        help="Number of top tickets to use after cross-encoder re-ranking (must be ≤ retrieved tickets)"
     )
 
     st.divider()
@@ -84,7 +121,10 @@ def render_input_panel():
         'subject': subject,
         'body': body,
         'rag_mode': rag_mode,
+        'retriever_type': retriever_type,
         'show_references': show_references,
+        'top_k_initial': top_k_initial,
+        'top_k_reranked': top_k_reranked,
         'submit': submit,
         'clear': clear
     }
@@ -93,6 +133,19 @@ def render_input_panel():
 def render_response_panel(response, show_references):
     """Render right panel with AI-generated response"""
     st.header("💡 AI-Generated Response")
+
+    # Display generated queries if MultiQuery mode was used
+    if response.get('generated_queries') and len(response['generated_queries']) > 1:
+        with st.expander("🔄 Generated Query Variations", expanded=False):
+            st.markdown("**MultiQuery mode generated these search variations:**")
+            for i, query in enumerate(response['generated_queries'], 1):
+                if i == 1:
+                    st.markdown(f"**{i}. Original Query:**")
+                else:
+                    st.markdown(f"**{i}. Variation {i-1}:**")
+                st.text(query)
+                if i < len(response['generated_queries']):
+                    st.divider()
 
     # Display answer
     st.markdown(response['answer'])
@@ -124,7 +177,7 @@ def render_response_panel(response, show_references):
     if show_references and response.get('references'):
         with st.expander("📚 Reference Tickets", expanded=True):
             for i, ref in enumerate(response['references'], 1):
-                st.markdown(f"**Ticket #{i}** - Match: {ref['score']:.1%}")
+                st.markdown(f"**Ticket #{i}** - Relevance: {ref['score']:.2f}")
 
                 ref_col1, ref_col2 = st.columns([1, 1])
                 with ref_col1:
@@ -157,7 +210,8 @@ def render_empty_state():
 
     1. **Enter your ticket** - Provide a subject and detailed description
     2. **Choose RAG mode** - Select strict (context-only) or augmented (+ LLM knowledge)
-    3. **Get AI assistance** - Receive intelligent solutions based on historical tickets
+    3. **Choose retriever** - Standard, MultiQuery (multiple variations), or MMR (diverse results)
+    4. **Get AI assistance** - Receive intelligent solutions based on historical tickets
 
     ### Example tickets to try:
 
@@ -177,10 +231,22 @@ def render_empty_state():
 
 def main():
     """Main application logic"""
-    # Initialize pipeline
+    # Render header first
+    render_header()
+
+    # Two-column layout for input
+    left_col, right_col = st.columns([1, 1.5])
+
+    with left_col:
+        inputs = render_input_panel()
+
+    # Initialize pipeline with selected options
     try:
         with st.spinner("🔧 Initializing RAG pipeline..."):
-            pipeline, config = load_pipeline()
+            pipeline, config = load_pipeline(
+                rag_mode=inputs['rag_mode'],
+                retriever_type=inputs['retriever_type']
+            )
 
     except FileNotFoundError:
         st.error("""
@@ -200,15 +266,6 @@ def main():
         st.error(f"❌ **Initialization failed:** {str(e)}")
         st.stop()
 
-    # Render header
-    render_header()
-
-    # Two-column layout
-    left_col, right_col = st.columns([1, 1.5])
-
-    with left_col:
-        inputs = render_input_panel()
-
     with right_col:
         # Handle clear button
         if inputs['clear']:
@@ -221,17 +278,14 @@ def main():
                 st.error("⚠️ Please provide both subject and body")
                 render_empty_state()
             else:
-                # Update config if RAG mode changed
-                if inputs['rag_mode'] != config.rag_mode:
-                    config.rag_mode = inputs['rag_mode']
-                    pipeline._build_chain()  # Rebuild chain with new mode
-
                 # Process ticket
                 with st.spinner("🤔 Analyzing your ticket and generating solution..."):
                     try:
                         response = pipeline.process_ticket(
                             subject=inputs['subject'],
-                            body=inputs['body']
+                            body=inputs['body'],
+                            top_k_initial=inputs['top_k_initial'],
+                            top_k_reranked=inputs['top_k_reranked']
                         )
 
                         # Display response
