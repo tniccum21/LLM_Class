@@ -76,6 +76,12 @@ class AppConfig:
 
     def __post_init__(self):
         """Post-initialization processing"""
+        # Resolve chroma_db_path to absolute path
+        chroma_path = Path(self.chroma_db_path)
+        if not chroma_path.is_absolute():
+            chroma_path = Path(__file__).parent / self.chroma_db_path
+        self.chroma_db_path = str(chroma_path)
+
         # Set persist_directory from chroma_db_path if not explicitly set
         if self.persist_directory is None:
             self.persist_directory = self.chroma_db_path
@@ -84,13 +90,16 @@ class AppConfig:
         if self.rag_mode not in ['strict', 'augmented']:
             raise ValueError(f"Invalid rag_mode: {self.rag_mode}. Must be 'strict' or 'augmented'")
 
-        # Validate paths exist for required files
+        # Validate and resolve CSV path
         csv_file = Path(self.csv_path)
         if not csv_file.is_absolute():
             csv_file = Path(__file__).parent / self.csv_path
 
         if not csv_file.exists():
             raise FileNotFoundError(f"Dataset not found: {csv_file}")
+
+        # Update csv_path to absolute path
+        self.csv_path = str(csv_file)
 
     def get_prompt_template(self) -> str:
         """
@@ -102,37 +111,35 @@ class AppConfig:
         if self.rag_mode == 'strict':
             return """You are a technical support assistant helping resolve IT support tickets.
 
-IMPORTANT: You must ONLY use information from the provided historical ticket context below.
-Do not use any external knowledge or make assumptions beyond what is explicitly stated in the context.
+CRITICAL INSTRUCTION: You must respond using ONLY the exact language and approaches from the Resolution sections in the similar cases below. Do NOT generate new text, paraphrase, or use your own knowledge.
 
-If the historical tickets do not contain sufficient information to answer the question,
-clearly state that you cannot provide an answer based on the available context.
+Your response must be based on copying and adapting the Resolution text from one or more similar cases above. If you cannot find a matching resolution in the similar cases, say: "I need more information to assist you. Please provide [specific details]."
 
-Historical Ticket Context:
+Similar Support Cases:
 {context}
 
 Guidelines:
-- Base your answer entirely on the historical tickets provided
-- Reference specific ticket numbers when applicable
-- If multiple solutions exist, present all relevant options
-- If context is insufficient, explicitly state what information is missing
+- Copy the Resolution approach from the most similar case above
+- Use the exact phrasing and structure from those Resolutions
+- You may combine elements from multiple Resolutions if they all apply
+- Do NOT create new language - only use what appears in the Resolution sections
+- Respond as if you are directly helping the customer (don't mention "similar cases" or "context")
 """
         else:  # augmented
             return """You are a technical support assistant helping resolve IT support tickets.
 
-You have access to historical ticket context below, which should be your PRIMARY reference.
+You have access to similar support cases below, which should be your PRIMARY reference.
 However, you may supplement this information with your general IT knowledge when it provides
 helpful additional context or clarification.
 
-Historical Ticket Context:
+Similar Support Cases:
 {context}
 
 Guidelines:
-- Prioritize information from the historical tickets
+- Prioritize solutions from the similar support cases above
 - Supplement with general IT knowledge when helpful
-- Clearly distinguish between context-based and knowledge-based information
-- Reference specific ticket numbers when using historical context
 - Provide comprehensive, actionable solutions
+- Respond as if you are directly helping the customer (don't mention "historical tickets" or "context")
 """
 
     def to_dict(self) -> Dict[str, Any]:

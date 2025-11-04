@@ -5,6 +5,7 @@ One-time setup script to build ChromaDB vector database from complete dataset.
 Uses 100% of available tickets (no train/test split) for production retrieval.
 """
 
+import shutil
 import time
 from pathlib import Path
 from typing import List
@@ -15,6 +16,27 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
 from config import get_config, AppConfig
+
+
+def delete_old_database(persist_directory: str) -> None:
+    """
+    Delete old ChromaDB database if it exists
+
+    Args:
+        persist_directory: Path to ChromaDB persist directory
+    """
+    db_path = Path(persist_directory)
+
+    if db_path.exists():
+        print(f"🗑️  Deleting old database: {persist_directory}")
+        try:
+            shutil.rmtree(db_path)
+            print(f"✓ Old database deleted")
+        except Exception as e:
+            print(f"⚠️  Warning: Could not delete old database: {str(e)}")
+            print(f"   Continuing with build...")
+    else:
+        print(f"ℹ️  No existing database found at: {persist_directory}")
 
 
 def load_tickets(csv_path: str) -> pd.DataFrame:
@@ -59,14 +81,24 @@ def create_documents(df: pd.DataFrame) -> List[Document]:
     print(f"\n📝 Creating document objects...")
 
     documents = []
+    skipped = 0
 
     for idx, row in df.iterrows():
-        # Combine translated columns if available, fallback to original
-        subject = row.get('subject_translated', row.get('subject', ''))
-        body = row.get('body_translated', row.get('body', ''))
+        # Use English translations if available, otherwise skip
+        subject = row.get('subject_english')
+        body = row.get('body_english')
+        answer = row.get('answer_english')
 
-        # Create document content
-        content = f"{subject}\n\n{body}"
+        # Skip rows with missing English translations
+        if pd.isna(subject) or pd.isna(body):
+            skipped += 1
+            continue
+
+        # Create document content with answer if available
+        if pd.notna(answer):
+            content = f"Problem:\nSubject: {subject}\n\n{body}\n\nResolution:\n{answer}"
+        else:
+            content = f"Problem:\nSubject: {subject}\n\n{body}"
 
         # Build metadata
         metadata = {
@@ -78,9 +110,9 @@ def create_documents(df: pd.DataFrame) -> List[Document]:
         }
 
         # Add optional fields if present
-        if 'agent' in row:
+        if 'agent' in row and pd.notna(row['agent']):
             metadata['agent'] = str(row['agent'])
-        if 'resolution' in row:
+        if 'resolution' in row and pd.notna(row['resolution']):
             metadata['resolution'] = str(row['resolution'])
 
         doc = Document(
@@ -94,6 +126,9 @@ def create_documents(df: pd.DataFrame) -> List[Document]:
             print(f"  Progress: {idx + 1:,}/{len(df):,} ({(idx + 1)/len(df)*100:.1f}%)")
 
     print(f"✓ Created {len(documents):,} document objects")
+    if skipped > 0:
+        print(f"  ⚠️  Skipped {skipped:,} tickets with missing English translations ({skipped/len(df)*100:.1f}%)")
+
     return documents
 
 
@@ -224,6 +259,9 @@ def main():
 
     # Load configuration
     config = get_config()
+
+    # Step 0: Delete old database
+    delete_old_database(config.persist_directory)
 
     # Step 1: Load tickets
     df = load_tickets(config.csv_path)

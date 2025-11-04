@@ -129,7 +129,7 @@ class RAGPipeline:
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
-            ("user", "Subject: {subject}\n\nBody: {body}\n\nProvide a detailed, actionable solution.")
+            ("user", "Support Ticket:\nSubject: {subject}\nBody: {body}\n\nPlease provide a detailed, actionable solution based on the similar cases above.")
         ])
 
         # Build chain with LCEL
