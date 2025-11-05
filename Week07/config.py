@@ -72,6 +72,25 @@ class AppConfig:
     # ===== Data Configuration =====
     csv_path: str = 'dataset-tickets-multi-lang3-4k-translated-all.csv'
 
+    # ===== Input Guardrails Configuration =====
+    enable_guardrails: bool = True
+    guardrail_model_path: str = field(
+        default_factory=lambda: os.getenv('GUARDRAIL_MODEL', 'llama-guard-3-8b')
+    )  # Model name in LM Studio
+
+    # Safety thresholds (0.0-1.0, higher = stricter)
+    safety_threshold: float = 0.7  # Block if safety_score < threshold
+
+    # Violation severity blocking
+    block_critical: bool = True    # Always block critical violations
+    block_high: bool = True        # Block high severity violations
+    block_medium: bool = False     # Warn but allow medium violations
+    block_low: bool = False        # Allow low severity violations
+
+    # Performance
+    guardrail_timeout: int = 10    # Seconds
+    guardrail_max_tokens: int = 512
+
     # ===== Future Extensibility =====
     extra_options: Dict[str, Any] = field(default_factory=dict)
 

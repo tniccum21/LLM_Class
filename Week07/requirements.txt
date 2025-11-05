@@ -23,6 +23,9 @@ sentence-transformers>=2.3.0
 openai>=1.10.0
 requests>=2.31.0
 
+# Guardrails (via LM Studio API)
+# No additional dependencies needed - uses requests for HTTP calls
+
 # Environment Management
 python-dotenv>=1.0.0
 
