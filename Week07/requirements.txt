@@ -23,8 +23,11 @@ sentence-transformers>=2.3.0
 openai>=1.10.0
 requests>=2.31.0
 
-# Guardrails (via LM Studio API)
-# No additional dependencies needed - uses requests for HTTP calls
+# Guardrails
+# - Llama Guard 3 8B via LM Studio API (uses requests for HTTP calls)
+# - Llama Prompt Guard 2 86M via HuggingFace transformers
+transformers>=4.36.0
+torch>=2.1.0
 
 # Environment Management
 python-dotenv>=1.0.0

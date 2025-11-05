@@ -78,6 +78,10 @@ class AppConfig:
         default_factory=lambda: os.getenv('GUARDRAIL_MODEL', 'llama-guard-3-8b')
     )  # Model name in LM Studio
 
+    # Content Safety & Prompt Injection Protection
+    enable_llama_guard: bool = True   # Use Llama Guard 3 8B for general content safety
+    enable_prompt_guard: bool = True  # Use Llama Prompt Guard 2 86M for injection detection
+
     # Safety thresholds (0.0-1.0, higher = stricter)
     safety_threshold: float = 0.7  # Block if safety_score < threshold
 

@@ -10,6 +10,7 @@ from pathlib import Path
 
 from config import get_config
 from rag_pipeline import RAGPipeline
+from input_guardian import InputGuardian, ValidationResult
 
 
 # Page configuration
@@ -30,6 +31,29 @@ def load_pipeline(rag_mode='strict', retriever_type='standard'):
     pipeline = RAGPipeline(config)
     pipeline.initialize()
     return pipeline, config
+
+
+@st.cache_resource
+def load_guardian(enable_guardrails=True, enable_llama_guard=True, enable_prompt_guard=True):
+    """Load and initialize input guardian (cached for performance)"""
+    if not enable_guardrails:
+        return None
+
+    config = get_config()
+    # Apply checkbox settings before initialization
+    config.enable_llama_guard = enable_llama_guard
+    config.enable_prompt_guard = enable_prompt_guard
+    guardian = InputGuardian(config)
+
+    try:
+        guardian.initialize()
+        return guardian
+    except ConnectionError as e:
+        st.warning(f"⚠️ Guardrails disabled: {str(e)}")
+        return None
+    except Exception as e:
+        st.error(f"❌ Guardrails initialization failed: {str(e)}")
+        return None
 
 
 def render_header():
@@ -109,6 +133,32 @@ def render_input_panel():
         help="Number of top tickets to use after cross-encoder re-ranking (must be ≤ retrieved tickets)"
     )
 
+    st.subheader("🛡️ Safety Options")
+
+    enable_guardrails = st.checkbox(
+        "Enable Content Safety Check",
+        value=True,
+        help="Screen input for malicious intent and abusive language using Llama Guard 3 8B via LM Studio"
+    )
+
+    enable_prompt_guard = st.checkbox(
+        "Enable Prompt Injection Detection",
+        value=True,
+        help="Detect prompt injection attacks using Llama Prompt Guard 2 86M (requires transformers)"
+    )
+
+    if enable_guardrails:
+        safety_threshold = st.slider(
+            "Safety Threshold",
+            min_value=0.5,
+            max_value=0.95,
+            value=0.7,
+            step=0.05,
+            help="Higher = stricter validation (0.7 recommended)"
+        )
+    else:
+        safety_threshold = 0.7
+
     st.divider()
 
     col1, col2 = st.columns(2)
@@ -125,6 +175,9 @@ def render_input_panel():
         'show_references': show_references,
         'top_k_initial': top_k_initial,
         'top_k_reranked': top_k_reranked,
+        'enable_guardrails': enable_guardrails,
+        'enable_prompt_guard': enable_prompt_guard,
+        'safety_threshold': safety_threshold,
         'submit': submit,
         'clear': clear
     }
@@ -200,6 +253,36 @@ def render_response_panel(response, show_references):
                     st.divider()
 
 
+def render_validation_panel(validation: ValidationResult):
+    """Render input validation results"""
+
+    if validation.is_safe:
+        st.success(f"✅ Input Validated - Safety Score: {validation.safety_score:.1%}")
+    else:
+        st.error(f"🚨 Safety Violations Detected - Score: {validation.safety_score:.1%}")
+
+        for violation in validation.violations:
+            severity_icons = {
+                'critical': '🔴',
+                'high': '🟠',
+                'medium': '🟡',
+                'low': '🟢'
+            }
+
+            icon = severity_icons.get(violation.severity, '⚪')
+
+            st.warning(f"""
+**{icon} {violation.category.replace('_', ' ').title()}**
+- Severity: {violation.severity.upper()}
+- Confidence: {violation.confidence:.1%}
+- Issue: {violation.explanation}
+            """)
+
+    with st.expander("⏱️ Validation Metrics", expanded=False):
+        st.text(f"Processing Time: {validation.processing_time:.2f}s")
+        st.text(f"Timestamp: {validation.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+
+
 def render_empty_state():
     """Render empty state when no response yet"""
     st.header("💡 AI-Generated Response")
@@ -266,6 +349,16 @@ def main():
         st.error(f"❌ **Initialization failed:** {str(e)}")
         st.stop()
 
+    # Initialize guardian if ANY guardrail is enabled
+    guardian = None
+    if inputs['enable_guardrails'] or inputs['enable_prompt_guard']:
+        with st.spinner("🛡️ Initializing input guardian..."):
+            guardian = load_guardian(
+                enable_guardrails=True,  # Keep True to avoid early return in load_guardian
+                enable_llama_guard=inputs['enable_guardrails'],
+                enable_prompt_guard=inputs['enable_prompt_guard']
+            )
+
     with right_col:
         # Handle clear button
         if inputs['clear']:
@@ -278,7 +371,31 @@ def main():
                 st.error("⚠️ Please provide both subject and body")
                 render_empty_state()
             else:
-                # Process ticket
+                # Step 1: Guardrails validation (if any guardrail enabled)
+                validation = None
+                if guardian:
+                    with st.spinner("🛡️ Validating input for safety..."):
+                        try:
+                            # Update safety threshold in config
+                            config.safety_threshold = inputs['safety_threshold']
+
+                            validation = guardian.validate_ticket(
+                                subject=inputs['subject'],
+                                body=inputs['body']
+                            )
+
+                            # Display validation results
+                            render_validation_panel(validation)
+
+                            # Block if unsafe
+                            if not validation.is_safe:
+                                st.stop()
+
+                        except Exception as e:
+                            st.warning(f"⚠️ Guardrail validation failed: {str(e)}")
+                            st.warning("Proceeding without safety validation")
+
+                # Step 2: Process ticket (only if safe or guardrails disabled)
                 with st.spinner("🤔 Analyzing your ticket and generating solution..."):
                     try:
                         response = pipeline.process_ticket(
