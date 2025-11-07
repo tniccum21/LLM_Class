@@ -45,12 +45,8 @@ class AppConfig:
     similarity_threshold: float = 0.5  # Minimum similarity score
 
     # ===== LLM Configuration =====
-    lm_studio_url: str = field(
-        default_factory=lambda: os.getenv('LM_STUDIO_URL', 'http://192.168.7.171:1234')
-    )
-    llm_model: str = field(
-        default_factory=lambda: os.getenv('LM_STUDIO_MODEL', 'gpt-oss-20b')
-    )
+    lm_studio_url: str = ''  # Required from environment, validated in __post_init__
+    llm_model: str = ''  # Required from environment, validated in __post_init__
     max_tokens: int = 6000
     temperature: float = 0.1
     timeout: int = 60  # Seconds
@@ -74,9 +70,7 @@ class AppConfig:
 
     # ===== Input Guardrails Configuration =====
     enable_guardrails: bool = True
-    guardrail_model_path: str = field(
-        default_factory=lambda: os.getenv('GUARDRAIL_MODEL', 'llama-guard-3-8b')
-    )  # Model name in LM Studio
+    guardrail_model_path: str = ''  # Required from environment, validated in __post_init__
 
     # Content Safety & Prompt Injection Protection
     enable_llama_guard: bool = True   # Use Llama Guard 3 8B for general content safety
@@ -100,6 +94,28 @@ class AppConfig:
 
     def __post_init__(self):
         """Post-initialization processing"""
+        # Load and validate required environment variables
+        self.lm_studio_url = os.getenv('LM_STUDIO_URL')
+        if not self.lm_studio_url:
+            raise ValueError(
+                "❌ LM_STUDIO_URL environment variable is required but not set.\n"
+                "   Please set it in secrets.env (e.g., LM_STUDIO_URL=http://192.168.7.171:1234)"
+            )
+
+        self.llm_model = os.getenv('LM_STUDIO_MODEL')
+        if not self.llm_model:
+            raise ValueError(
+                "❌ LM_STUDIO_MODEL environment variable is required but not set.\n"
+                "   Please set it in secrets.env (e.g., LM_STUDIO_MODEL=gpt-oss-20b)"
+            )
+
+        self.guardrail_model_path = os.getenv('GUARDRAIL_MODEL')
+        if not self.guardrail_model_path:
+            raise ValueError(
+                "❌ GUARDRAIL_MODEL environment variable is required but not set.\n"
+                "   Please set it in secrets.env (e.g., GUARDRAIL_MODEL=llama-guard-3-8b-imat)"
+            )
+
         # Resolve chroma_db_path to absolute path
         chroma_path = Path(self.chroma_db_path)
         if not chroma_path.is_absolute():
