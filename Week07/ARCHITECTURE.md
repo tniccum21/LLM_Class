@@ -21,53 +21,94 @@ graph TB
         subgraph "Left Panel"
             SUBJECT[Subject Input]
             BODY[Body Input]
-            OPTIONS[Options<br/>☐ Strict Mode<br/>☐ Show Refs]
+            SLIDERS[Retrieval Sliders<br/>Initial K: 5-50<br/>Reranked N: 1-20]
+            RETRIEVER[Retriever Type<br/>- Standard<br/>- MultiQuery<br/>- MMR]
+            OPTIONS[RAG Mode<br/>- Strict<br/>- Augmented]
+            SAFETY[Safety Controls<br/>- Content Safety<br/>- Prompt Injection]
             SUBMIT[Submit Button]
         end
 
         subgraph "Right Panel"
             ANSWER[Markdown Answer]
-            METRICS[Performance Metrics<br/>⏱️ Time 📊 Confidence]
+            METRICS[Performance Metrics<br/>Time & Confidence]
             REFS[Reference Tickets]
+            VALIDATION[Safety Validation<br/>Pass/Fail Status]
         end
 
         SUBJECT --> UI
         BODY --> UI
+        SLIDERS --> UI
+        RETRIEVER --> UI
         OPTIONS --> UI
-        SUBMIT --> PIPELINE
+        SAFETY --> UI
+        SUBMIT --> GUARDIAN
+        GUARDIAN -->|Safe| PIPELINE
+        GUARDIAN -->|Unsafe| VALIDATION
         PIPELINE --> ANSWER
         PIPELINE --> METRICS
         PIPELINE --> REFS
     end
 
+    subgraph "Input Guardian (input_guardian.py)"
+        GUARDIAN[Validation Orchestrator]
+
+        PROMPT_GUARD[Prompt Guard 2 86M<br/>HuggingFace Local<br/>50-200ms]
+        LLAMA_GUARD[Llama Guard 3 8B<br/>LM Studio API<br/>500-1500ms]
+
+        GUARDIAN -->|Layer 1| PROMPT_GUARD
+        GUARDIAN -->|Layer 2| LLAMA_GUARD
+        PROMPT_GUARD -->|JAILBREAK| BLOCK[Block Submission]
+        LLAMA_GUARD -->|S1-S13| BLOCK
+        PROMPT_GUARD -->|BENIGN| SAFE[Continue to RAG]
+        LLAMA_GUARD -->|safe| SAFE
+    end
+
     subgraph "RAG Pipeline (rag_pipeline.py)"
         PIPELINE[Pipeline Orchestrator]
 
-        EMBED[1. Embed Query<br/>HuggingFace]
-        SEARCH[2. Vector Search<br/>ChromaDB top-20]
-        RERANK[3. Re-rank Results<br/>CrossEncoder top-5]
+        EMBED[1. Embed Query<br/>all-MiniLM-L6-v2]
+
+        SEARCH_SWITCH{Retriever Type?}
+        SEARCH_STD[2a. Standard Search<br/>Cosine Similarity<br/>100-300ms]
+        SEARCH_MQ[2b. MultiQuery Search<br/>LLM Expansion + Search<br/>2-5s]
+        SEARCH_MMR[2c. MMR Search<br/>Diversity-Aware<br/>200-500ms]
+
+        RERANK[3. Re-rank Results<br/>mxbai-rerank-base-v1<br/>top-5]
         CONTEXT[4. Build Context<br/>Format tickets]
-        LLM[5. Generate Answer<br/>LangChain + LM Studio]
+        CONFIDENCE[5. Calculate Confidence<br/>Weighted scores]
+        LLM[6. Generate Answer<br/>LangChain + LM Studio]
 
         PIPELINE --> EMBED
-        EMBED --> SEARCH
-        SEARCH --> RERANK
+        EMBED --> SEARCH_SWITCH
+        SEARCH_SWITCH -->|Standard| SEARCH_STD
+        SEARCH_SWITCH -->|MultiQuery| SEARCH_MQ
+        SEARCH_SWITCH -->|MMR| SEARCH_MMR
+        SEARCH_STD --> RERANK
+        SEARCH_MQ --> RERANK
+        SEARCH_MMR --> RERANK
         RERANK --> CONTEXT
-        CONTEXT --> LLM
+        CONTEXT --> CONFIDENCE
+        CONFIDENCE --> LLM
     end
 
     subgraph "External Services"
-        LMSTUDIO[LM Studio<br/>192.168.7.171:1234<br/>gpt-oss-20b]
+        LMSTUDIO[LM Studio Server<br/>192.168.7.171:1234<br/>gpt-oss-20b<br/>Llama Guard 3 8B]
     end
 
-    SEARCH <-->|Query| CHROMA
+    SEARCH_STD <-->|Query| CHROMA
+    SEARCH_MQ <-->|Query| CHROMA
+    SEARCH_MMR <-->|Query| CHROMA
+    LLAMA_GUARD <-->|API Call| LMSTUDIO
     LLM <-->|API Call| LMSTUDIO
 
     style CSV fill:#e1f5ff
     style CHROMA fill:#ffe1e1
     style UI fill:#e1ffe1
+    style GUARDIAN fill:#ffe6e6
     style PIPELINE fill:#fff4e1
     style LMSTUDIO fill:#f0e1ff
+    style BLOCK fill:#ff9999
+    style SAFE fill:#99ff99
 ```
 
 ## Data Flow Sequence
@@ -76,14 +117,48 @@ graph TB
 sequenceDiagram
     participant User
     participant UI as Streamlit UI
+    participant Guardian as Input Guardian
+    participant PromptGuard as Prompt Guard 2
+    participant LlamaGuard as Llama Guard 3
     participant Pipeline as RAG Pipeline
     participant ChromaDB as Vector Store
     participant Reranker as CrossEncoder
     participant LLM as LM Studio
 
     User->>UI: Enter subject & body
-    User->>UI: Select options (strict/augmented)
+    User->>UI: Configure sliders (K, N)
+    User->>UI: Select retriever type
+    User->>UI: Select RAG mode
+    User->>UI: Enable safety checks
     User->>UI: Click Submit
+
+    alt Safety Checks Enabled
+        UI->>Guardian: Validate ticket content
+
+        alt Prompt Injection Check Enabled
+            Note over Guardian,PromptGuard: Layer 1: Jailbreak Detection
+            Guardian->>PromptGuard: Check for prompt injection (50-200ms)
+            PromptGuard-->>Guardian: BENIGN or JAILBREAK
+
+            alt JAILBREAK Detected
+                Guardian-->>UI: Validation failed (jailbreak)
+                UI->>User: Display error + violation details
+            end
+        end
+
+        alt Content Safety Check Enabled
+            Note over Guardian,LlamaGuard: Layer 2: Content Moderation
+            Guardian->>LlamaGuard: Check 13 safety categories (500-1500ms)
+            LlamaGuard-->>Guardian: safe or unsafe,S#,S#
+
+            alt Unsafe Content Detected
+                Guardian-->>UI: Validation failed (categories S1-S13)
+                UI->>User: Display error + violation details
+            end
+        end
+
+        Guardian-->>UI: Validation passed
+    end
 
     UI->>Pipeline: Process ticket request
 
@@ -91,25 +166,42 @@ sequenceDiagram
     Pipeline->>Pipeline: Generate embedding (384-dim)
 
     Note over Pipeline: Step 2: Vector Search
-    Pipeline->>ChromaDB: Query with embedding
-    ChromaDB-->>Pipeline: Return top-20 candidates
+    alt Standard Retriever
+        Pipeline->>ChromaDB: Cosine similarity search (100-300ms)
+    else MultiQuery Retriever
+        Pipeline->>Pipeline: Generate 3 query variations via LLM
+        Pipeline->>ChromaDB: Search with each variation (2-5s)
+        Pipeline->>Pipeline: Deduplicate and combine results
+    else MMR Retriever
+        Pipeline->>ChromaDB: Diversity-aware search (200-500ms)
+    end
+    ChromaDB-->>Pipeline: Return top-K candidates
 
     Note over Pipeline: Step 3: Re-rank
-    Pipeline->>Reranker: Score query-document pairs
-    Reranker-->>Pipeline: Return top-5 with scores
+    Pipeline->>Reranker: Score query-document pairs (500-1500ms)
+    Reranker-->>Pipeline: Return top-N with scores
 
     Note over Pipeline: Step 4: Build Context
     Pipeline->>Pipeline: Format tickets for LLM
 
-    Note over Pipeline: Step 5: Generate Answer
-    Pipeline->>LLM: Send prompt + context
+    Note over Pipeline: Step 5: Calculate Confidence
+    Pipeline->>Pipeline: Weighted average of re-ranking scores
+
+    Note over Pipeline: Step 6: Generate Answer
+    alt Strict Mode
+        Pipeline->>LLM: Context-only prompt (2-10s)
+    else Augmented Mode
+        Pipeline->>LLM: Context + general knowledge prompt (2-10s)
+    end
     LLM-->>Pipeline: Generate response
 
-    Pipeline-->>UI: Return answer + metrics
+    Pipeline-->>UI: Return answer + confidence + metrics + references
 
     UI->>User: Display markdown answer
+    UI->>User: Show confidence score
     UI->>User: Show performance metrics
-    UI->>User: Show reference tickets (optional)
+    UI->>User: Show reference tickets
+    UI->>User: Show safety validation results
 ```
 
 ## Component Architecture
@@ -118,6 +210,7 @@ sequenceDiagram
 graph LR
     subgraph "Core Components"
         CONFIG[config.py<br/>AppConfig]
+        GUARDIAN[input_guardian.py<br/>Safety Validation]
         PIPELINE[rag_pipeline.py<br/>RAG Functions]
         APP[ticket_support_app.py<br/>Streamlit UI]
         BUILD[build_vectordb.py<br/>DB Builder]
@@ -131,15 +224,27 @@ graph LR
         LC_CHAIN[LCEL Chain]
     end
 
-    subgraph "External Models"
-        EMB_MODEL[all-MiniLM-L6-v2<br/>Embedding Model]
-        RERANK_MODEL[mxbai-rerank-base-v1<br/>Re-ranking Model]
-        LLM_MODEL[gpt-oss-20b<br/>Language Model]
+    subgraph "HuggingFace Models"
+        EMB_MODEL[all-MiniLM-L6-v2<br/>Embedding Model<br/>384-dim]
+        RERANK_MODEL[mxbai-rerank-base-v1<br/>Re-ranking Model<br/>278M params]
+        PROMPT_GUARD_MODEL[Prompt-Guard-86M<br/>Jailbreak Detection<br/>86M params]
     end
 
+    subgraph "LM Studio Models"
+        LLM_MODEL[gpt-oss-20b<br/>Language Model<br/>20B params]
+        LLAMA_GUARD_MODEL[Llama-Guard-3-8B<br/>Content Safety<br/>8B params]
+    end
+
+    CONFIG --> GUARDIAN
     CONFIG --> PIPELINE
     CONFIG --> APP
     CONFIG --> BUILD
+
+    APP --> GUARDIAN
+    APP --> PIPELINE
+
+    GUARDIAN --> PROMPT_GUARD_MODEL
+    GUARDIAN --> LC_LLM
 
     PIPELINE --> LC_EMB
     PIPELINE --> LC_VDB
@@ -150,11 +255,12 @@ graph LR
     LC_EMB --> EMB_MODEL
     LC_CHAIN --> RERANK_MODEL
     LC_LLM --> LLM_MODEL
+    LC_LLM --> LLAMA_GUARD_MODEL
 
-    APP --> PIPELINE
     BUILD --> LC_VDB
 
     style CONFIG fill:#e1f5ff
+    style GUARDIAN fill:#ffe6e6
     style PIPELINE fill:#fff4e1
     style APP fill:#e1ffe1
     style BUILD fill:#ffe1e1
@@ -167,25 +273,49 @@ stateDiagram-v2
     [*] --> AppInit
 
     AppInit --> LoadingModels: First Run
-    LoadingModels --> ModelsLoaded: Success
+    LoadingModels --> LoadingGuardian: Pipeline Loaded
+    LoadingGuardian --> ModelsLoaded: Guardian Loaded (if enabled)
+    LoadingGuardian --> ModelsLoaded: Skip (if disabled)
     LoadingModels --> Error: Failure
 
     ModelsLoaded --> Idle: Ready
 
-    Idle --> Processing: User Submits
-    Processing --> Embedding: Query
-    Embedding --> VectorSearch: Embedded
-    VectorSearch --> Reranking: Retrieved 20
-    Reranking --> ContextBuilding: Top 5
-    ContextBuilding --> LLMGeneration: Context Ready
+    Idle --> SafetyCheck: User Submits
+    SafetyCheck --> PromptGuardCheck: Check Enabled
+    SafetyCheck --> Processing: Checks Disabled
+
+    PromptGuardCheck --> Jailbreak: JAILBREAK Detected
+    PromptGuardCheck --> ContentSafetyCheck: BENIGN
+
+    ContentSafetyCheck --> Unsafe: S1-S13 Violation
+    ContentSafetyCheck --> Processing: safe
+
+    Jailbreak --> ValidationError: Show Error
+    Unsafe --> ValidationError: Show Error
+    ValidationError --> Idle: User Reviews
+
+    Processing --> RetrieverSelection: Query Validated
+    RetrieverSelection --> StandardSearch: Standard
+    RetrieverSelection --> MultiQuerySearch: MultiQuery
+    RetrieverSelection --> MMRSearch: MMR
+
+    StandardSearch --> Reranking: Retrieved K
+    MultiQuerySearch --> Reranking: Retrieved K
+    MMRSearch --> Reranking: Retrieved K
+
+    Reranking --> ContextBuilding: Top N
+    ContextBuilding --> ConfidenceCalc: Context Ready
+    ConfidenceCalc --> LLMGeneration: Confidence Scored
+
     LLMGeneration --> DisplayAnswer: Generated
     DisplayAnswer --> Idle: Complete
 
-    Idle --> ConfigChange: User Changes Options
+    Idle --> ConfigChange: User Changes Sliders/Options
     ConfigChange --> Idle: Applied
 
     Error --> AppInit: Retry
     DisplayAnswer --> Error: LLM Failure
+    LLMGeneration --> Error: Timeout/Connection
 ```
 
 ## File Organization
@@ -193,14 +323,24 @@ stateDiagram-v2
 ```
 Week07/
 │
-├── 📄 DESIGN.md                        # Design specification (this file)
-├── 📄 ARCHITECTURE.md                  # Architecture diagrams
-├── 📄 README.md                        # User documentation
+├── 📄 Documentation
+│   ├── ARCHITECTURE.md                 # Architecture diagrams (this file)
+│   ├── README.md                       # User documentation
+│   └── Week07_Presentation.md          # Classroom presentation slides
 │
-├── 🐍 Core Application Files
+├── 🐍 Core Application Files (Fully Documented)
 │   ├── config.py                       # Configuration management
+│   ├── input_guardian.py               # Dual-layer safety validation
+│   │                                   # - Llama Guard 3 8B (content safety)
+│   │                                   # - Prompt Guard 2 86M (jailbreak detection)
 │   ├── rag_pipeline.py                 # RAG pipeline implementation
+│   │                                   # - Three retriever strategies
+│   │                                   # - Two-stage retrieval
+│   │                                   # - LangChain LCEL integration
 │   ├── ticket_support_app.py           # Streamlit UI application
+│   │                                   # - Two-column layout
+│   │                                   # - Configuration sliders
+│   │                                   # - Safety controls
 │   └── build_vectordb.py               # Vector DB builder script
 │
 ├── 📦 Dependencies
@@ -212,12 +352,13 @@ Week07/
 │   ├── dataset-tickets-multi-lang3-4k.csv
 │   └── chroma_ticket_db/               # Vector database (gitignored)
 │
-├── 📓 Notebooks (Reference)
+├── 📓 Notebooks (Reference - Week 6)
 │   ├── ticket_rag_langchain_simple.ipynb
 │   └── ticket_rag_system.ipynb
 │
 └── 🧪 Tests (Future)
     ├── test_config.py
+    ├── test_input_guardian.py
     ├── test_rag_pipeline.py
     └── test_app.py
 ```
@@ -234,48 +375,105 @@ Week07/
 - **SQLite** (embedded) - ChromaDB backend
 
 ### ML Models
-- **HuggingFace Transformers** - Embedding model hosting
-  - Model: `sentence-transformers/all-MiniLM-L6-v2`
-  - Dimensions: 384
-  - Size: ~80MB
 
-- **CrossEncoder** - Re-ranking model
-  - Model: `mixedbread-ai/mxbai-rerank-base-v1`
+#### Retrieval & Ranking Models (HuggingFace)
+- **Embedding Model** - `sentence-transformers/all-MiniLM-L6-v2`
+  - Purpose: Query and document embeddings
+  - Dimensions: 384
+  - Parameters: 22M
+  - Size: ~80MB
+  - Device: CPU
+  - Speed: ~10-50ms per query
+
+- **Re-ranking Model** - `mixedbread-ai/mxbai-rerank-base-v1`
+  - Purpose: Cross-encoder relevance scoring
   - Parameters: 278M
   - Size: ~1GB
+  - Device: CPU
+  - Speed: ~50-100ms per document
+
+#### Safety Models
+
+- **Prompt Injection Detection** - `meta-llama/Prompt-Guard-86M`
+  - Purpose: Jailbreak and prompt injection detection
+  - Parameters: 86M
+  - Size: ~350MB
+  - Device: CPU (HuggingFace transformers)
+  - Speed: ~50-200ms per check
+  - Classes: BENIGN (0), JAILBREAK (1)
+
+- **Content Safety** - `meta-llama/Llama-Guard-3-8B`
+  - Purpose: 13-category content moderation
+  - Parameters: 8B
+  - Size: ~16GB
+  - Device: GPU (via LM Studio)
+  - Speed: ~500-1500ms per check
+  - Categories: S1-S13 (violence, hate speech, etc.)
 
 ### LLM Integration
 - **LM Studio** - Local LLM server
-  - Model: `gpt-oss-20b`
+  - Primary Model: `gpt-oss-20b` (answer generation)
+  - Safety Model: `Llama-Guard-3-8B` (content moderation)
   - API: OpenAI-compatible
   - Protocol: HTTP REST
+  - Network: Local (192.168.7.171:1234)
 
 ### Data Processing
 - **Pandas** 2.0+ - DataFrame operations
 - **NumPy** (implicit) - Numerical computations
+- **PyTorch** (implicit) - Model inference backend
 
 ## Performance Characteristics
 
 ### Resource Requirements
 
-| Component | Memory | Disk | CPU |
-|-----------|--------|------|-----|
-| Embedding Model | ~200MB | 80MB | Low |
-| Re-ranker Model | ~1.2GB | 1GB | Medium |
-| ChromaDB Index | ~500MB | 2GB | Low |
-| Streamlit App | ~100MB | - | Low |
-| **Total** | **~2GB** | **3GB** | **Medium** |
+| Component | Memory | Disk | CPU/GPU | Notes |
+|-----------|--------|------|---------|-------|
+| Embedding Model | ~200MB | 80MB | CPU Low | all-MiniLM-L6-v2 |
+| Re-ranker Model | ~1.2GB | 1GB | CPU Medium | mxbai-rerank-base-v1 |
+| Prompt Guard Model | ~400MB | 350MB | CPU Low | 86M parameters |
+| ChromaDB Index | ~500MB | 2GB | CPU Low | Persistent on disk |
+| Streamlit App | ~200MB | - | CPU Low | Includes UI state |
+| LM Studio (LLM) | ~12GB | 20GB | GPU High | gpt-oss-20b |
+| LM Studio (Guard) | ~8GB | 16GB | GPU High | Llama-Guard-3-8B |
+| **Total (Local)** | **~2.5GB** | **3.5GB** | **Medium** | Without LM Studio |
+| **Total (Full)** | **~22.5GB** | **39.5GB** | **GPU Required** | With LM Studio |
 
 ### Response Time Breakdown
 
+#### Without Safety Checks (Baseline)
 ```
-Total Response Time: 2-5 seconds
-├── Embedding:        0.05-0.1s  (2-4%)
-├── Vector Search:    0.2-0.5s   (8-20%)
-├── Re-ranking:       0.3-0.6s   (12-24%)
-├── Context Build:    0.05-0.1s  (2-4%)
-└── LLM Generation:   1.0-4.0s   (40-80%)
+Total Response Time: 3-12 seconds
+├── Embedding:        0.05-0.1s   (1-2%)
+├── Vector Search:    0.1-0.5s    (2-8%)
+│   ├── Standard:     0.1-0.3s
+│   ├── MultiQuery:   2.0-5.0s    (includes LLM expansion)
+│   └── MMR:          0.2-0.5s
+├── Re-ranking:       0.5-1.5s    (10-25%)
+├── Context Build:    0.05-0.1s   (1-2%)
+├── Confidence Calc:  0.01-0.05s  (<1%)
+└── LLM Generation:   2.0-10.0s   (40-80%)
 ```
+
+#### With Safety Checks (Full Protection)
+```
+Total Response Time: 4-14 seconds
+├── Prompt Guard:     0.05-0.2s   (1-3%)
+├── Content Safety:   0.5-1.5s    (10-20%)
+├── [RAG Pipeline]:   3-12s       (70-85%)
+└── Overhead:         ~1-2s       (safety validation)
+```
+
+### Performance by Configuration
+
+| Configuration | Time Range | Best For |
+|---------------|------------|----------|
+| Standard, No Safety | 3-5s | Development, testing |
+| Standard, Full Safety | 4-7s | **Production default** |
+| MultiQuery, Full Safety | 6-12s | Complex queries |
+| MMR, Full Safety | 5-8s | Diverse results needed |
+| Standard, Content Only | 3.5-6.5s | Trusted internal users |
+| Standard, Prompt Only | 3.1-5.2s | Public-facing, speed priority |
 
 ### Scalability Considerations
 

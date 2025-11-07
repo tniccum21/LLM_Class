@@ -6,38 +6,98 @@ A production-ready Streamlit application that provides intelligent support ticke
 
 ### Architecture Components
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Week07 RAG System                             │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌────────────────────┐          ┌─────────────────────────┐   │
-│  │ build_vectordb.py  │          │  ticket_support_app.py   │   │
-│  │                    │          │                          │   │
-│  │ - Load CSV         │          │  ┌────────────────────┐ │   │
-│  │ - Create embeddings│          │  │  User Interface    │ │   │
-│  │ - Build ChromaDB   │          │  │  ┌──────┐ ┌──────┐ │ │   │
-│  │ - Persist to disk  │          │  │  │Left  │ │Right │ │ │   │
-│  └────────────────────┘          │  │  │Panel │ │Panel │ │ │   │
-│           │                      │  │  └──────┘ └──────┘ │ │   │
-│           │                      │  └────────────────────┘ │   │
-│           ▼                      │           │             │   │
-│  ┌────────────────────┐          │           ▼             │   │
-│  │   ChromaDB Store   │◄─────────┤  ┌────────────────────┐│   │
-│  │  chroma_ticket_db/ │          │  │  RAG Pipeline      ││   │
-│  │                    │          │  │  - Embed query     ││   │
-│  │ - Embeddings       │          │  │  - Vector search   ││   │
-│  │ - Metadata         │          │  │  - Re-rank results ││   │
-│  │ - Indices          │          │  │  - Generate answer ││   │
-│  └────────────────────┘          │  └────────────────────┘│   │
-│                                  │           │             │   │
-│                                  │           ▼             │   │
-│                                  │  ┌────────────────────┐│   │
-│                                  │  │   LM Studio LLM    ││   │
-│                                  │  │  gpt-oss-20b       ││   │
-│                                  │  └────────────────────┘│   │
-│                                  └─────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Data Preparation (One-Time)"
+        CSV[Dataset CSV<br/>3,601 tickets]
+        BUILD[build_vectordb.py<br/>- Load CSV<br/>- Create embeddings<br/>- Build ChromaDB<br/>- Persist to disk]
+        CSV -->|Load & Process| BUILD
+        BUILD -->|Embed & Index| CHROMA
+    end
+
+    subgraph "Vector Store"
+        CHROMA[(ChromaDB<br/>chroma_ticket_db/<br/>- Embeddings<br/>- Metadata<br/>- HNSW Index)]
+    end
+
+    subgraph "Streamlit Application (ticket_support_app.py)"
+        UI[User Interface]
+
+        subgraph "Left Panel - Input"
+            SUBJECT[Subject Input]
+            BODY[Body Input]
+            SLIDERS[Retrieval Sliders]
+            RETRIEVER[Retriever Type]
+            MODE[RAG Mode<br/>Strict/Augmented]
+            SAFETY[Safety Controls]
+            SUBMIT[Submit Button]
+        end
+
+        subgraph "Right Panel - Response"
+            ANSWER[Markdown Answer]
+            METRICS[Performance Metrics]
+            REFS[Reference Tickets]
+            VALIDATION[Safety Status]
+        end
+
+        GUARDIAN[Dual-Layer Validation]
+        PIPELINE[Pipeline Orchestrator]
+        
+        SUBMIT --> GUARDIAN
+        GUARDIAN -->|Safe| PIPELINE
+        GUARDIAN -->|Blocked| VALIDATION
+        PIPELINE --> ANSWER
+        PIPELINE --> METRICS
+        PIPELINE --> REFS
+    end
+
+    subgraph "Input Guardian (input_guardian.py)"
+        PROMPT_GUARD[Prompt Guard 2<br/>Jailbreak Detection]
+        LLAMA_GUARD[Llama Guard 3<br/>Content Safety]
+
+        GUARDIAN --> PROMPT_GUARD
+        GUARDIAN --> LLAMA_GUARD
+    end
+
+    subgraph "RAG Pipeline (rag_pipeline.py)"
+        EMBED[1. Embed Query<br/>all-MiniLM-L6-v2]
+        SEARCH{2. Retriever Type}
+        SEARCH_STD[Standard Search]
+        SEARCH_MQ[MultiQuery Search]
+        SEARCH_MMR[MMR Search]
+        RERANK[3. Re-rank<br/>mxbai-rerank-base-v1]
+        CONTEXT[4. Build Context]
+        CONFIDENCE[5. Calculate Confidence]
+        LLM_GEN[6. Generate Answer<br/>LM Studio]
+
+        PIPELINE --> EMBED
+        EMBED --> SEARCH
+        SEARCH -->|Standard| SEARCH_STD
+        SEARCH -->|MultiQuery| SEARCH_MQ
+        SEARCH -->|MMR| SEARCH_MMR
+        SEARCH_STD --> RERANK
+        SEARCH_MQ --> RERANK
+        SEARCH_MMR --> RERANK
+        RERANK --> CONTEXT
+        CONTEXT --> CONFIDENCE
+        CONFIDENCE --> LLM_GEN
+    end
+
+    subgraph "External Services"
+        LMSTUDIO[LM Studio<br/>192.168.7.171:1234<br/>- gpt-oss-20b<br/>- Llama Guard 3]
+    end
+
+    SEARCH_STD <-->|Query| CHROMA
+    SEARCH_MQ <-->|Query| CHROMA
+    SEARCH_MMR <-->|Query| CHROMA
+    LLAMA_GUARD <-->|API| LMSTUDIO
+    LLM_GEN <-->|API| LMSTUDIO
+
+    style CSV fill:#e1f5ff
+    style CHROMA fill:#ffe1e1
+    style UI fill:#e1ffe1
+    style GUARDIAN fill:#ffe6e6
+    style PIPELINE fill:#fff4e1
+    style LMSTUDIO fill:#f0e1ff
 ```
 
 ## Component Design
@@ -85,35 +145,77 @@ def validate_vectordb(vectordb: Chroma) -> dict
 
 #### UI Layout
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  🎫 Intelligent Support Ticket Assistant                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌──────────────────────┐  ┌──────────────────────────────────┐│
-│  │  📝 Ticket Input     │  │  💡 AI-Generated Response        ││
-│  │                      │  │                                  ││
-│  │  Subject:            │  │  [Markdown rendered answer]      ││
-│  │  ┌────────────────┐  │  │                                  ││
-│  │  │                │  │  │  ### Solution                    ││
-│  │  └────────────────┘  │  │  Based on similar tickets...     ││
-│  │                      │  │                                  ││
-│  │  Body:               │  │  ### Steps                       ││
-│  │  ┌────────────────┐  │  │  1. ...                          ││
-│  │  │                │  │  │  2. ...                          ││
-│  │  │                │  │  │                                  ││
-│  │  │                │  │  │  ### References                  ││
-│  │  │                │  │  │  - Ticket #1234 (95% match)      ││
-│  │  └────────────────┘  │  │  - Ticket #5678 (87% match)      ││
-│  │                      │  │                                  ││
-│  │  ⚙️ Options:         │  │  ───────────────────────────────││
-│  │  ☐ Strict Mode      │  │  ⏱️ Response Time: 2.3s          ││
-│  │  ☐ Show References  │  │  📊 Confidence: 92%              ││
-│  │                      │  │  🔍 Retrieved: 5 tickets         ││
-│  │  [Submit] [Clear]   │  │                                  ││
-│  └──────────────────────┘  └──────────────────────────────────┘│
-│                                                                   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph "Streamlit Application - Two-Column Layout"
+        subgraph "Left Panel - Ticket Input"
+            HEADER1[Intelligent Support Ticket Assistant]
+            SUBJECT_IN[Subject Text Input<br/>Brief description]
+            BODY_IN[Body Text Area<br/>Detailed issue description]
+
+            subgraph "Configuration Controls"
+                SLIDER_K[Initial K Slider<br/>5-50 candidates]
+                SLIDER_N[Reranked N Slider<br/>1-20 final results]
+                RET_TYPE[Retriever Type<br/>- Standard<br/>- MultiQuery<br/>- MMR]
+                RAG_MODE[RAG Mode<br/>- Strict<br/>- Augmented]
+                SAFE_OPT[Safety Options<br/>- Content Safety<br/>- Prompt Injection]
+                REF_OPT[Display Options<br/>- Show References<br/>- Show Metrics]
+            end
+
+            ACTIONS[Action Buttons<br/>Submit or Clear]
+
+            HEADER1 --> SUBJECT_IN
+            SUBJECT_IN --> BODY_IN
+            BODY_IN --> SLIDER_K
+            SLIDER_K --> SLIDER_N
+            SLIDER_N --> RET_TYPE
+            RET_TYPE --> RAG_MODE
+            RAG_MODE --> SAFE_OPT
+            SAFE_OPT --> REF_OPT
+            REF_OPT --> ACTIONS
+        end
+
+        subgraph "Right Panel - AI Response"
+            HEADER2[AI-Generated Response]
+
+            subgraph "Safety Validation"
+                SAFE_STATUS[Validation Status<br/>Pass or Blocked<br/>Categories shown if unsafe]
+            end
+
+            subgraph "Main Answer"
+                ANSWER_MD[Markdown Rendered Answer<br/>Solution with Steps]
+            end
+
+            subgraph "Performance Metrics"
+                METRIC1[Response Time<br/>2.3s]
+                METRIC2[Confidence Score<br/>92%]
+                METRIC3[Tickets Retrieved<br/>5 tickets]
+            end
+
+            subgraph "Reference Tickets (Expandable)"
+                REF1[Ticket 1 - 95% match<br/>Subject + Body preview]
+                REF2[Ticket 2 - 87% match<br/>Subject + Body preview]
+                REF3[More references...]
+            end
+
+            HEADER2 --> SAFE_STATUS
+            SAFE_STATUS --> ANSWER_MD
+            ANSWER_MD --> METRIC1
+            METRIC1 --> METRIC2
+            METRIC2 --> METRIC3
+            METRIC3 --> REF1
+            REF1 --> REF2
+            REF2 --> REF3
+        end
+
+        ACTIONS -.->|User Submits| HEADER2
+    end
+
+    style HEADER1 fill:#e1f5ff
+    style HEADER2 fill:#e1ffe1
+    style SAFE_STATUS fill:#ffe6e6
+    style ANSWER_MD fill:#fff4e1
+    style ACTIONS fill:#ffe1e1
 ```
 
 #### Configuration Management
@@ -154,6 +256,86 @@ class AppConfig:
 
 #### State Management
 
+```mermaid
+stateDiagram-v2
+    [*] --> AppInit
+
+    AppInit --> LoadingConfig: Load Configuration
+    LoadingConfig --> LoadingVectorDB: Config Ready
+    LoadingVectorDB --> LoadingReranker: VectorDB Loaded
+    LoadingReranker --> LoadingLLM: Reranker Loaded
+    LoadingLLM --> LoadingGuardian: LLM Connected
+    LoadingGuardian --> Ready: Guardian Loaded - if enabled
+    LoadingGuardian --> Ready: Skip - if disabled
+    LoadingConfig --> Error: Config Failed
+    LoadingVectorDB --> Error: DB Load Failed
+    LoadingReranker --> Error: Model Failed
+    LoadingLLM --> Error: Connection Failed
+
+    Ready --> Idle: Models Ready
+
+    Idle --> InputValidation: User Submits
+
+    InputValidation --> SafetyCheck: Inputs Valid
+    InputValidation --> Idle: Validation Error
+
+    SafetyCheck --> PromptGuardCheck: Safety Enabled
+    SafetyCheck --> Processing: Safety Disabled
+
+    PromptGuardCheck --> JailbreakDetected: JAILBREAK
+    PromptGuardCheck --> ContentSafetyCheck: BENIGN
+
+    ContentSafetyCheck --> UnsafeContent: Safety Category Violation
+    ContentSafetyCheck --> Processing: safe
+
+    JailbreakDetected --> ErrorDisplay: Show Jailbreak Error
+    UnsafeContent --> ErrorDisplay: Show Safety Error
+    ErrorDisplay --> Idle: User Reviews
+
+    Processing --> Embedding: Start Pipeline
+    Embedding --> RetrieverSelection: Query Embedded
+    RetrieverSelection --> StandardSearch: Standard Selected
+    RetrieverSelection --> MultiQuerySearch: MultiQuery Selected
+    RetrieverSelection --> MMRSearch: MMR Selected
+
+    StandardSearch --> Reranking: Retrieved K
+    MultiQuerySearch --> Reranking: Retrieved K
+    MMRSearch --> Reranking: Retrieved K
+
+    Reranking --> ContextBuilding: Top N Selected
+    ContextBuilding --> ConfidenceCalc: Context Built
+    ConfidenceCalc --> LLMGeneration: Confidence Scored
+
+    LLMGeneration --> ResponseDisplay: Answer Generated
+    ResponseDisplay --> Idle: Complete
+
+    Idle --> ConfigUpdate: User Changes Settings
+    ConfigUpdate --> Idle: Settings Applied
+
+    Error --> AppInit: Retry Initialization
+    ResponseDisplay --> Error: LLM Failure
+    LLMGeneration --> Error: Timeout/Connection
+
+    note right of Ready
+        Session State:
+        - vectordb
+        - reranker
+        - llm
+        - guardian
+        - config
+    end note
+
+    note right of Processing
+        Pipeline Stages:
+        1. Embedding
+        2. Vector Search
+        3. Re-ranking
+        4. Context Build
+        5. Confidence Calc
+        6. LLM Generation
+    end note
+```
+
 **Session State Structure**:
 ```python
 # Initialize session state
@@ -166,11 +348,87 @@ if 'reranker' not in st.session_state:
 if 'llm' not in st.session_state:
     st.session_state.llm = init_llm()
 
+if 'guardian' not in st.session_state:
+    st.session_state.guardian = init_guardian()
+
 if 'config' not in st.session_state:
     st.session_state.config = AppConfig()
 ```
 
 #### RAG Pipeline Implementation
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as Streamlit UI
+    participant Guard as Input Guardian
+    participant Pipeline as RAG Pipeline
+    participant Embed as Embedding Model
+    participant VDB as ChromaDB
+    participant Rerank as Re-ranker
+    participant LLM as LM Studio
+
+    User->>UI: Enter subject & body
+    User->>UI: Configure retrieval settings
+    User->>UI: Select retriever type
+    User->>UI: Select RAG mode
+    User->>UI: Enable/disable safety
+    User->>UI: Click Submit
+
+    alt Safety Checks Enabled
+        UI->>Guard: Validate input
+        Guard->>Guard: Prompt Guard check (50-200ms)
+        Guard->>LLM: Llama Guard check (500-1500ms)
+        alt Unsafe Detected
+            Guard-->>UI: Validation failed
+            UI->>User: Display safety error
+        end
+        Guard-->>UI: Validation passed
+    end
+
+    UI->>Pipeline: Process ticket (subject, body, config)
+
+    Note over Pipeline: Stage 1 - Query Embedding
+    Pipeline->>Embed: Generate embedding (384-dim)
+    Embed-->>Pipeline: Query vector
+
+    Note over Pipeline: Stage 2 - Vector Search
+    alt Standard Retriever
+        Pipeline->>VDB: Cosine similarity search (100-300ms)
+    else MultiQuery Retriever
+        Pipeline->>Pipeline: Generate 3 query variations
+        Pipeline->>VDB: Search with variations (2-5s)
+        Pipeline->>Pipeline: Deduplicate results
+    else MMR Retriever
+        Pipeline->>VDB: Diversity-aware search (200-500ms)
+    end
+    VDB-->>Pipeline: Top-K candidates (default K=20)
+
+    Note over Pipeline: Stage 3 - Re-ranking
+    Pipeline->>Rerank: Score query-doc pairs (500-1500ms)
+    Rerank-->>Pipeline: Top-N with scores (default N=5)
+
+    Note over Pipeline: Stage 4 - Context Building
+    Pipeline->>Pipeline: Format tickets for LLM prompt
+
+    Note over Pipeline: Stage 5 - Confidence Calculation
+    Pipeline->>Pipeline: Weighted average of scores
+
+    Note over Pipeline: Stage 6 - Answer Generation
+    alt Strict Mode
+        Pipeline->>LLM: Context-only prompt (2-10s)
+    else Augmented Mode
+        Pipeline->>LLM: Context + general knowledge (2-10s)
+    end
+    LLM-->>Pipeline: Generated answer
+
+    Pipeline-->>UI: Response package
+    Note over UI: Contains:<br/>- Answer text<br/>- Confidence score<br/>- References<br/>- Metrics
+
+    UI->>User: Display markdown answer
+    UI->>User: Show performance metrics
+    UI->>User: Show reference tickets
+```
 
 **Core Pipeline Functions**:
 ```python
@@ -397,20 +655,113 @@ def render_response_panel(response: dict, metrics: PerformanceMetrics, show_refe
                 st.divider()
 ```
 
+## Component Dependencies
+
+```mermaid
+graph TB
+    subgraph "Python Files"
+        CONFIG[config.py<br/>AppConfig dataclass]
+        GUARDIAN[input_guardian.py<br/>InputGuardian class]
+        PIPELINE[rag_pipeline.py<br/>RAGPipeline class]
+        APP[ticket_support_app.py<br/>Streamlit app]
+        BUILD[build_vectordb.py<br/>DB builder script]
+    end
+
+    subgraph "External Dependencies"
+        STREAMLIT[Streamlit 1.30+<br/>Web framework]
+        LANGCHAIN[LangChain 0.1+<br/>RAG orchestration]
+        CHROMADB[ChromaDB 0.4.22+<br/>Vector database]
+        SENT_TRANS[sentence-transformers<br/>Embeddings & re-ranking]
+        PYTORCH[PyTorch<br/>Model inference]
+        PANDAS[Pandas 2.0+<br/>Data processing]
+    end
+
+    subgraph "Data & Models"
+        CSV[Dataset CSV<br/>3,601 tickets]
+        VDB[(Vector Database<br/>chroma_ticket_db/)]
+        EMB_MODEL[all-MiniLM-L6-v2<br/>384-dim embeddings]
+        RERANK_MODEL[mxbai-rerank-base-v1<br/>278M params]
+        PROMPT_GUARD[Prompt-Guard-86M<br/>Jailbreak detection]
+    end
+
+    subgraph "External Services"
+        LMSTUDIO[LM Studio API<br/>192.168.7.171:1234]
+        LLM_MODEL[gpt-oss-20b<br/>Answer generation]
+        GUARD_MODEL[Llama-Guard-3-8B<br/>Content safety]
+    end
+
+    CONFIG --> GUARDIAN
+    CONFIG --> PIPELINE
+    CONFIG --> APP
+    CONFIG --> BUILD
+
+    APP --> STREAMLIT
+    APP --> GUARDIAN
+    APP --> PIPELINE
+
+    GUARDIAN --> SENT_TRANS
+    GUARDIAN --> PROMPT_GUARD
+    GUARDIAN --> LMSTUDIO
+
+    PIPELINE --> LANGCHAIN
+    PIPELINE --> CHROMADB
+    PIPELINE --> SENT_TRANS
+    PIPELINE --> LMSTUDIO
+
+    BUILD --> PANDAS
+    BUILD --> LANGCHAIN
+    BUILD --> CHROMADB
+
+    LANGCHAIN --> PYTORCH
+    CHROMADB --> VDB
+    SENT_TRANS --> EMB_MODEL
+    SENT_TRANS --> RERANK_MODEL
+    LMSTUDIO --> LLM_MODEL
+    LMSTUDIO --> GUARD_MODEL
+
+    BUILD --> CSV
+    VDB --> APP
+    VDB --> PIPELINE
+
+    style CONFIG fill:#e1f5ff
+    style GUARDIAN fill:#ffe6e6
+    style PIPELINE fill:#fff4e1
+    style APP fill:#e1ffe1
+    style BUILD fill:#ffe1e1
+    style LMSTUDIO fill:#f0e1ff
+```
+
 ## File Structure
 
 ```
 Week07/
-├── DESIGN.md                           # This document
-├── build_vectordb.py                   # Vector DB builder script
-├── ticket_support_app.py               # Main Streamlit application
-├── rag_pipeline.py                     # RAG pipeline components
-├── config.py                           # Configuration management
-├── requirements.txt                    # Python dependencies
-├── secrets.env                         # API keys (gitignored)
-├── chroma_ticket_db/                   # Vector database (gitignored)
-├── dataset-tickets-*.csv               # Training data
-└── README.md                           # User documentation
+├── 📄 Documentation
+│   ├── DESIGN.md                       # This document - system design
+│   ├── ARCHITECTURE.md                 # Architecture diagrams
+│   ├── README.md                       # User documentation
+│   └── Week07_Presentation.md          # Classroom slides
+│
+├── 🐍 Core Application Files (Fully Documented)
+│   ├── config.py                       # Configuration management
+│   ├── input_guardian.py               # Dual-layer safety validation
+│   ├── rag_pipeline.py                 # RAG pipeline components
+│   ├── ticket_support_app.py           # Main Streamlit application
+│   └── build_vectordb.py               # Vector DB builder script
+│
+├── 📦 Dependencies
+│   ├── requirements.txt                # Python dependencies
+│   └── secrets.env                     # API keys (gitignored)
+│
+├── 💾 Data Files
+│   ├── dataset-tickets-multi-lang3-4k-translated-all.csv
+│   ├── dataset-tickets-multi-lang3-4k.csv
+│   └── chroma_ticket_db/               # Vector database (gitignored)
+│
+└── 🧪 Tests (Future)
+    ├── test_config.py
+    ├── test_input_guardian.py
+    ├── test_rag_pipeline.py
+    └── test_app.py
 ```
 
 ## Dependencies
