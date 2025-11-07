@@ -9,6 +9,8 @@ Week04/.env
 Week04/secrets.env
 Week05/secrets.env
 Week06/secrets.env
+Week07/secrets.env
+
 
 # Python
 __pycache__/
@@ -56,4 +58,7 @@ Source_files/
 # future classes - hold for git update
 # Week05/
 Week05/chroma_ticket_db/
-Week05/ticket_rag_system backup.ipynb
+Week06/chroma_ticket_db/
+Week07/chroma_ticket_db/
+Week07/ARCHITECTURE.md
+Week07/DESIGN.md
