@@ -10,8 +10,10 @@ Week04/secrets.env
 Week05/secrets.env
 Week06/secrets.env
 Week07/secrets.env
-Week09/*
-
+Week08/secrets.env
+Week09/secrets.env
+Week10/secrets.env
+Week10/*
 
 # Python
 __pycache__/
@@ -56,6 +58,10 @@ logs/
 # Source data that has been cleaned
 Source_files/
 
+# Sync tools
+*.sync.ffs_db
+.sync.ffs_db
+
 # future classes - hold for git update
 # Week05/
 Week05/chroma_ticket_db/
@@ -63,4 +69,4 @@ Week06/chroma_ticket_db/
 Week07/chroma_ticket_db/
 Week07/ARCHITECTURE.md
 Week07/DESIGN.md
-Week09/
+Week10/
