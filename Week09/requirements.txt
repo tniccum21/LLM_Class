@@ -5,7 +5,8 @@
 fastmcp>=0.2.0
 
 # API Integration
-serpapi>=2.4.0
+# Note: serpapi v0.1.5+ uses new Client-based API
+serpapi>=0.1.5
 
 # Environment Management
 python-dotenv>=1.0.0
