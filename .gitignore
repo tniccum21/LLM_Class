@@ -1,7 +1,10 @@
-# Environment variables
+# Environment variables - Global patterns
+*.env
 .env
 .env.local
 .env.*.local
+
+# Legacy specific env file exclusions (covered by *.env above)
 Week01/.env
 Week02/.env
 Week03/.env
