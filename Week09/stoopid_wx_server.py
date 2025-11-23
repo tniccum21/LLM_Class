@@ -29,7 +29,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import FastMCP
-from serpapi import GoogleSearch
+from serpapi import Client
 
 # ==============================================================================
 # ENVIRONMENT SETUP
@@ -122,36 +122,37 @@ def get_weather(location: str) -> str:
         return "Error: SERPAPI_API_KEY environment variable not set. Please set it in secrets.env"
 
     try:
-        # Step 2: Construct search parameters Payload for SerpAPI
+        # Step 2: Initialize SerpAPI Client with API key
+        # New serpapi (v0.1.5+) uses Client-based API
+        client = Client(api_key=api_key)
+
+        # Step 3: Construct search parameters for Google Search
         # - q: Search query string
         # - hl: Host language (en = English)
         # - gl: Geo-location (us = United States)
-        # - api_key: Authentication credential
         params = {
             "q": f"What's the weather in {location}?",
             "hl": "en",
-            "gl": "us",
-            "api_key": api_key
+            "gl": "us"
         }
 
-        # Step 3: Execute API call
-        # GoogleSearch object handles HTTP request/response
-        search = GoogleSearch(params)
-        results = search.get_dict()  # Returns parsed JSON as Python dict
+        # Step 4: Execute API call using new Client.search() method
+        # engine="google" specifies Google Search
+        results = client.search(engine="google", params=params)
 
-        # Step 4: Handle API-level errors
+        # Step 5: Handle API-level errors
         # SerpAPI returns {"error": "message"} for API failures
         if "error" in results:
             return f"Error from SerpAPI: {results['error']}"
 
-        # Step 5: Parse response structure
+        # Step 6: Parse response structure
         # Google Search results have an "answer_box" for direct answers
         # This contains structured weather data (temperature, conditions, etc.)
         answer_box = results.get("answer_box")
         if not answer_box:
             return f"No weather data found for {location}"
 
-        # Step 6: Extract and format weather data
+        # Step 7: Extract and format weather data
         # Use .get() with defaults to handle missing fields gracefully
         temperature = answer_box.get('temperature', 'N/A')
         conditions = answer_box.get('weather', 'N/A')
@@ -159,7 +160,7 @@ def get_weather(location: str) -> str:
         return f"Weather in {location}: {temperature} and {conditions} with forecast {forecast}"
 
     except Exception as e:
-        # Step 7: Catch-all exception handler
+        # Step 8: Catch-all exception handler
         # Pattern: Log/return specific error details for debugging
         return f"Error getting weather for {location}: {str(e)}"
 

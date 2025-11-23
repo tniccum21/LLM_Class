@@ -1,0 +1,11 @@
+# Week09 - Stoopid Weather Server Requirements
+# MCP server providing weather information via SerpAPI
+
+# Core MCP Framework
+fastmcp>=0.2.0
+
+# API Integration
+serpapi>=2.4.0
+
+# Environment Management
+python-dotenv>=1.0.0

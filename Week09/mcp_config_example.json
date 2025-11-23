@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "stoopid-weather": {
+      "command": "/absolute/path/to/your/.venv/bin/python",
+      "args": [
+        "/absolute/path/to/Apps_with_AI/Week09/stoopid_wx_server.py"
+      ]
+    }
+  },
+
+  "_instructions": {
+    "description": "MCP configuration for Stoopid Weather Server",
+    "setup_steps": [
+      "1. Replace '/absolute/path/to/your/.venv/bin/python' with actual path to Python in your virtual environment",
+      "2. Replace '/absolute/path/to/Apps_with_AI/Week09/stoopid_wx_server.py' with actual path to the server script",
+      "3. Ensure secrets.env file exists in Week09/ directory with SERPAPI_API_KEY set",
+      "4. For Claude Desktop: Add this to ~/Library/Application Support/Claude/claude_desktop_config.json",
+      "5. For LM Studio: Add this to LM Studio MCP Server settings",
+      "6. Restart the MCP client after configuration"
+    ],
+    "example_paths": {
+      "macOS": {
+        "python": "/Users/yourname/projects/Apps_with_AI/.venv/bin/python",
+        "server": "/Users/yourname/projects/Apps_with_AI/Week09/stoopid_wx_server.py"
+      },
+      "linux": {
+        "python": "/home/yourname/projects/Apps_with_AI/.venv/bin/python",
+        "server": "/home/yourname/projects/Apps_with_AI/Week09/stoopid_wx_server.py"
+      },
+      "windows": {
+        "python": "C:\\Users\\yourname\\projects\\Apps_with_AI\\.venv\\Scripts\\python.exe",
+        "server": "C:\\Users\\yourname\\projects\\Apps_with_AI\\Week09\\stoopid_wx_server.py"
+      }
+    },
+    "testing": {
+      "manual_test": "python /path/to/stoopid_wx_server.py",
+      "verify_tools": "Should show 'get_weather' tool in MCP client",
+      "test_query": "What's the weather in Paris?"
+    }
+  }
+}
