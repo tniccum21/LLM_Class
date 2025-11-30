@@ -182,7 +182,8 @@ class CliApp:
 
     async def refresh_resources(self):
         try:
-            self.resources = await self.agent.list_docs_ids()
+            # Use actual MCP resource listing for any MCP server
+            self.resources = await self.agent.list_resource_uris()
             self.completer.update_resources(self.resources)
         except Exception as e:
             print(f"Error refreshing resources: {e}")

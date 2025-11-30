@@ -30,6 +30,18 @@ class CliChat(Chat):
             # This allows CLI to work with any MCP server
             return []
 
+    async def list_resource_uris(self) -> list[str]:
+        """List all available MCP resource URIs for autocomplete.
+
+        This uses the actual MCP list_resources() call to discover
+        resources from any MCP server, not just document servers.
+        """
+        try:
+            resources = await self.doc_client.list_resources()
+            return [str(r.uri) for r in resources]
+        except Exception:
+            return []
+
     async def get_doc_content(self, doc_id: str) -> str:
         """Get document content - supports both doc server and weather server resources"""
         try:
