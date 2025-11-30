@@ -40,7 +40,11 @@ class CliChat(Chat):
             try:
                 return await self.doc_client.read_resource(doc_id)
             except Exception:
-                return f"Could not read resource: {doc_id}"
+                # Try with trailing slash (FastMCP adds / to file:// URIs)
+                try:
+                    return await self.doc_client.read_resource(f"{doc_id}/")
+                except Exception:
+                    return f"Could not read resource: {doc_id}"
 
     async def get_prompt(
         self, command: str, doc_id: str
