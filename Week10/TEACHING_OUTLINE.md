@@ -369,17 +369,19 @@ async def my_tool(location: str, ctx: Context) -> str:
 - Server has data, Client has LLM
 - Best of both worlds!
 
-#### Slide 37: Sampling Workflow
+> ⚠️ **Important**: `ctx.sample()` is part of the MCP **specification** but is **NOT yet implemented in FastMCP**. This section covers the concept for future use.
+
+#### Slide 37: Sampling Workflow (Conceptual)
 ```
 1. Client calls server tool
 2. Server fetches external data
-3. Server calls ctx.sample("Analyze this data...")
+3. Server calls ctx.sample("Analyze this data...")  ← NOT YET IN FASTMCP
 4. Client's LLM generates response
 5. Server receives LLM output
 6. Server combines and returns final result
 ```
 
-#### Slide 38: Code Example
+#### Slide 38: Code Example (Future Implementation)
 ```python
 @mcp.tool
 async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
@@ -387,27 +389,32 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
     weather = fetch_weather(location)
 
     # Client's job: Provide intelligence
-    advice = await ctx.sample(f"""
-        Weather: {weather}
-        Activity: {activity}
-        Provide advice...
-    """)
+    # FUTURE: When FastMCP implements ctx.sample():
+    # advice = await ctx.sample(f"""
+    #     Weather: {weather}
+    #     Activity: {activity}
+    #     Provide advice...
+    # """)
+
+    # CURRENT: We simulate the concept
+    advice = f"[Simulated] Consider weather for {activity}"
 
     # Combine both
     return f"Weather: {weather}\nAdvice: {advice}"
 ```
 
-#### Slide 39: Why Sampling Matters
+#### Slide 39: Why Sampling Will Matter
 - Server doesn't need its own LLM
 - Client controls which model is used
 - Separation of concerns: Data vs Intelligence
 - Security: Client can approve/deny sampling requests
 
-#### Slide 40: Security Considerations
-- Sampling requires client permission
-- Client sees the sampling prompt
-- Client can filter/modify requests
+#### Slide 40: Current Status & Security Considerations
+- MCP SDK has types: `CreateMessageRequest`, `SamplingCapability`, `SamplingMessage`
+- FastMCP Context doesn't expose `sample()` method yet
+- When available: Sampling will require client permission
 - Trust relationship between client and server
+- Our demo tool simulates the concept for teaching
 
 ---
 
@@ -459,7 +466,7 @@ Show how resources are injected into context
 4. **Stacking**: Combine primitives for rich workflows
 5. **Roots**: Security boundaries for file access
 6. **Notifications**: Server pushes updates to client
-7. **Sampling**: Server requests LLM from client
+7. **Sampling**: Server requests LLM from client (concept - pending FastMCP support)
 
 #### Slide 47: Mental Model
 ```
