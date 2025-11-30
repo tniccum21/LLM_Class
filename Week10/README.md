@@ -113,7 +113,7 @@ Prompts that reference other MCP primitives:
 ### Section 5: Roots (Security)
 
 File system boundaries for resource access:
-- Configured in client MCP config
+- Configured in client MCP config (see [Roots Configuration](#roots-configuration) below)
 - Limits where `file://` resources can read
 - Security through principle of least privilege
 
@@ -219,6 +219,124 @@ cat secrets.env
 python3 mcp_client.py
 ```
 
+## Roots Configuration
+
+Roots define file system boundaries for `file://` resources - a critical security feature that limits what directories an MCP server can access.
+
+### The Security Problem
+
+Without roots, a `file://` resource could potentially read ANY file on your system:
+- `/etc/passwd` - system users
+- `~/.ssh/id_rsa` - private keys
+- `~/.aws/credentials` - cloud credentials
+
+### The Solution: Roots
+
+Roots create a sandbox - the server can ONLY access files within declared root directories.
+
+### MCP Config File Setup
+
+Create `mcp_config.json` in the Week10 directory:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "python3",
+      "args": ["stoopid_wx_server.py"],
+      "roots": [
+        "/absolute/path/to/Apps_with_AI/Week10",
+        "/absolute/path/to/shared/data"
+      ]
+    }
+  }
+}
+```
+
+### How file:// Resources Use Roots
+
+Resources with `file://` URIs are restricted to the declared roots:
+
+```python
+# In stoopid_wx_server.py
+@mcp.resource(uri="file://readme")
+def get_readme() -> str:
+    # This file MUST be within a declared root directory
+    readme_path = Path(__file__).parent / "README.md"
+    return readme_path.read_text()
+
+@mcp.resource(uri="file://config")
+def get_config_file() -> str:
+    # Also restricted to root directories
+    config_path = Path(__file__).parent / "config.json"
+    return config_path.read_text() if config_path.exists() else "{}"
+```
+
+### Trust Model
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ROOTS TRUST MODEL                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  SERVER declares:     "I need access to /path/to/data"      │
+│         ↓                                                   │
+│  CLIENT decides:      "I'll grant /path/to/data"            │
+│         ↓              OR "Denied - too broad"              │
+│  ENFORCEMENT:         Client enforces the boundary          │
+│                                                             │
+│  Key Principle: Server requests, Client grants              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Best Practices
+
+| Practice | Why |
+|----------|-----|
+| Use absolute paths | Avoid ambiguity |
+| Principle of least privilege | Only grant what's needed |
+| Never root system directories | `/etc`, `/usr`, `~/.ssh` are off-limits |
+| Use project-relative roots | Keep access scoped to project |
+| Review roots before granting | Understand what you're allowing |
+
+### Example: Claude Desktop Configuration
+
+For Claude Desktop, configure roots in `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "stoopid-weather": {
+      "command": "python3",
+      "args": ["/path/to/Week10/stoopid_wx_server.py"],
+      "roots": [
+        "/path/to/Week10"
+      ],
+      "env": {
+        "SERPAPI_API_KEY": "your-key-here"
+      }
+    }
+  }
+}
+```
+
+### Graceful Degradation
+
+Resources should handle denied access gracefully:
+
+```python
+@mcp.resource(uri="file://config")
+def get_config_file() -> str:
+    config_path = Path(__file__).parent / "config.json"
+
+    if config_path.exists():
+        return config_path.read_text()
+    else:
+        # Return helpful fallback instead of crashing
+        return '{"note": "No config.json found. Using defaults."}'
+```
+
 ## Next Steps
 
 After understanding MCP clients:
@@ -226,3 +344,4 @@ After understanding MCP clients:
 2. Combine multiple servers
 3. Implement sampling in your applications
 4. Add notifications for long-running operations
+5. Configure roots for secure file:// resource access
