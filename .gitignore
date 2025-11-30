@@ -16,7 +16,6 @@ Week07/secrets.env
 Week08/secrets.env
 Week09/secrets.env
 Week10/secrets.env
-Week10/*
 Weekxx/*
 
 # Python
@@ -73,5 +72,4 @@ Week06/chroma_ticket_db/
 Week07/chroma_ticket_db/
 Week07/ARCHITECTURE.md
 Week07/DESIGN.md
-Week10/
 Weekxx/
