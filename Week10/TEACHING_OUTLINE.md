@@ -369,52 +369,55 @@ async def my_tool(location: str, ctx: Context) -> str:
 - Server has data, Client has LLM
 - Best of both worlds!
 
-> ⚠️ **Important**: `ctx.sample()` is part of the MCP **specification** but is **NOT yet implemented in FastMCP**. This section covers the concept for future use.
+> ✅ **Available**: `ctx.sample()` is available in **FastMCP 2.0+** (we have 2.13.1)
 
-#### Slide 37: Sampling Workflow (Conceptual)
+#### Slide 37: Sampling Workflow
 ```
 1. Client calls server tool
-2. Server fetches external data
-3. Server calls ctx.sample("Analyze this data...")  ← NOT YET IN FASTMCP
+2. Server fetches external data (SerpAPI weather)
+3. Server calls ctx.sample("Analyze this data...")
 4. Client's LLM generates response
 5. Server receives LLM output
 6. Server combines and returns final result
 ```
 
-#### Slide 38: Code Example (Future Implementation)
+#### Slide 38: Code Example
 ```python
 @mcp.tool
 async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
     # Server's job: Get data
     weather = fetch_weather(location)
 
-    # Client's job: Provide intelligence
-    # FUTURE: When FastMCP implements ctx.sample():
-    # advice = await ctx.sample(f"""
-    #     Weather: {weather}
-    #     Activity: {activity}
-    #     Provide advice...
-    # """)
+    # Client's job: Provide intelligence via ctx.sample()
+    advice_response = await ctx.sample(
+        messages=f"Weather: {weather}, Activity: {activity}. Provide advice...",
+        max_tokens=200,
+        temperature=0.7
+    )
 
-    # CURRENT: We simulate the concept
-    advice = f"[Simulated] Consider weather for {activity}"
+    # Extract text from response (TextContent | ImageContent | AudioContent)
+    advice = advice_response.text
 
     # Combine both
     return f"Weather: {weather}\nAdvice: {advice}"
 ```
 
-#### Slide 39: Why Sampling Will Matter
-- Server doesn't need its own LLM
+#### Slide 39: Why Sampling Matters
+- Server doesn't need its own LLM or API keys
 - Client controls which model is used
 - Separation of concerns: Data vs Intelligence
 - Security: Client can approve/deny sampling requests
 
-#### Slide 40: Current Status & Security Considerations
-- MCP SDK has types: `CreateMessageRequest`, `SamplingCapability`, `SamplingMessage`
-- FastMCP Context doesn't expose `sample()` method yet
-- When available: Sampling will require client permission
-- Trust relationship between client and server
-- Our demo tool simulates the concept for teaching
+#### Slide 40: Client Support & Fallbacks
+| Client | Sampling Support |
+|--------|------------------|
+| Claude Desktop | ✅ Supported |
+| Pydantic AI | ✅ Supported |
+| Custom clients | Need `sampling_handler` |
+| Our CLI (`stoopid_wx_cli.py`) | ⚠️ Falls back gracefully |
+
+- Always wrap `ctx.sample()` in try/except for graceful fallback
+- Tool remains functional even if client doesn't support sampling
 
 ---
 
@@ -466,7 +469,7 @@ Show how resources are injected into context
 4. **Stacking**: Combine primitives for rich workflows
 5. **Roots**: Security boundaries for file access
 6. **Notifications**: Server pushes updates to client
-7. **Sampling**: Server requests LLM from client (concept - pending FastMCP support)
+7. **Sampling**: Server requests LLM from client via `ctx.sample()` (FastMCP 2.0+)
 
 #### Slide 47: Mental Model
 ```

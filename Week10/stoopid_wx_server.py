@@ -594,47 +594,49 @@ async def get_weather_with_logging(location: str, ctx: Context) -> str:
 
 @mcp.tool(
     name="get_weather_advice",
-    description="Get weather AND personalized advice. Demonstrates sampling CONCEPT (simulated - not yet in FastMCP)."
+    description="Get weather AND personalized advice using ctx.sample() to request LLM from client."
 )
 async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
     """
-    Weather tool that demonstrates SAMPLING CONCEPT - server requesting LLM from client.
+    Weather tool that demonstrates SAMPLING - server requesting LLM from client.
 
-    ⚠️ IMPORTANT: SAMPLING NOT YET IMPLEMENTED IN FASTMCP ⚠️
-    ---------------------------------------------------------
-    ctx.sample() is part of the MCP specification but FastMCP has not yet
-    exposed it through the Context object. This tool SIMULATES the concept
-    for teaching purposes. The MCP SDK contains the types (CreateMessageRequest,
-    SamplingCapability, SamplingMessage) but they're not available via Context.
+    SAMPLING (Available in FastMCP 2.0+):
+    -------------------------------------
+    ctx.sample() sends a request to the CLIENT's LLM for completion.
+    The server provides data, the client provides intelligence!
 
-    SAMPLING CONCEPT:
-    -----------------
-    Normal flow: Client has LLM, server has data
-    With sampling: Server can ASK the client's LLM to generate content!
+    API: ctx.sample(messages, system_prompt=None, temperature=None, max_tokens=None)
+    Returns: TextContent | ImageContent | AudioContent
 
     Why is this powerful?
     - Server focuses on data (weather API)
     - Client provides intelligence (LLM)
     - Best of both worlds!
+    - Server doesn't need its own API keys!
 
-    Workflow (when implemented):
+    Workflow:
     1. Client calls this tool
-    2. Server fetches weather data
-    3. Server asks CLIENT'S LLM: "Given this weather, what advice?"
-    4. Client's LLM generates advice
-    5. Server combines data + advice
-    6. Returns comprehensive response
+    2. Server fetches weather data from SerpAPI
+    3. Server calls ctx.sample() → Client's LLM generates advice
+    4. Server combines data + advice
+    5. Returns comprehensive response
+
+    Client Support Requirements:
+    - Claude Desktop: ✅ Supported
+    - Pydantic AI: ✅ Supported
+    - Custom clients: Need sampling_handler implementation
+    - If client doesn't support sampling, tool falls back gracefully
 
     Args:
         location: Location for weather query
         activity: What the user wants to do (hiking, beach, etc.)
-        ctx: MCP Context (injected by FastMCP)
+        ctx: MCP Context for sampling (injected by FastMCP)
 
     Returns:
-        str: Weather data combined with simulated advice (real LLM when sampling available)
+        str: Weather data combined with LLM-generated advice
 
     Teaching Notes:
-        - FUTURE: ctx.sample() sends a prompt to the CLIENT'S LLM
+        - ctx.sample() sends a prompt to the CLIENT'S LLM
         - Server doesn't need its own LLM!
         - Use for: summarization, translation, personalization
         - Client controls which LLM is used and its parameters
@@ -660,46 +662,55 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
 
         await ctx.info(f"📊 Weather data: {weather_data}")
 
-        # Step 2: SAMPLING CONCEPT (NOT YET AVAILABLE IN FASTMCP)
+        # Step 2: Use SAMPLING to get advice from CLIENT'S LLM
         # ================================================================
-        # NOTE: ctx.sample() is part of the MCP specification but is NOT
-        # yet implemented in FastMCP. The code below demonstrates what
-        # sampling WOULD look like when it becomes available.
+        # ctx.sample() is available in FastMCP 2.0+ and sends a request
+        # to the CLIENT's LLM for completion. The server provides data,
+        # the client provides intelligence!
         #
-        # The MCP SDK has the types (CreateMessageRequest, SamplingCapability)
-        # but they're not exposed via the Context object yet.
+        # API: ctx.sample(messages, system_prompt=None, temperature=None, max_tokens=None)
+        # Returns: TextContent | ImageContent | AudioContent
         #
-        # For teaching purposes, we'll simulate what sampling would do:
-        # - Server sends a prompt to the CLIENT'S LLM
-        # - Server doesn't need its own LLM!
-        # - Client controls which model is used
-        # - Sampling requires client permission (security)
+        # IMPORTANT: Client must support sampling capability
+        # - Claude Desktop: Supported
+        # - Pydantic AI: Supported
+        # - Custom clients: Need sampling_handler implementation
         # ================================================================
 
-        await ctx.info("🤖 Sampling demo: In production, this would request advice from client LLM...")
+        await ctx.info("🤖 Requesting advice from client LLM via sampling...")
 
         sampling_prompt = f"""
-        Given the following weather conditions:
-        Location: {location}
-        {weather_data}
+Given the following weather conditions:
+Location: {location}
+{weather_data}
 
-        The user wants to: {activity}
+The user wants to: {activity}
 
-        Provide brief, practical advice (2-3 sentences) about whether
-        this is a good idea and any precautions they should take.
-        """
+Provide brief, practical advice (2-3 sentences) about whether
+this is a good idea and any precautions they should take.
+"""
 
-        # FUTURE: When FastMCP implements ctx.sample():
-        # advice_response = await ctx.sample(sampling_prompt)
-        # advice = advice_response.content if hasattr(advice_response, 'content') else str(advice_response)
+        try:
+            # ctx.sample() asks the CLIENT's LLM to generate a response
+            # The client controls which model is used!
+            advice_response = await ctx.sample(
+                messages=sampling_prompt,
+                max_tokens=200,
+                temperature=0.7
+            )
 
-        # CURRENT: Simulate what sampling would return
-        # In a real implementation, this would be generated by the client's LLM
-        advice = f"[Simulated LLM advice for {activity}] Based on {conditions} conditions, " \
-                 f"consider the weather when planning your activity. " \
-                 f"The temperature of {temperature} should be factored into your preparation."
+            # Extract the text from the sampling response
+            # Returns TextContent, ImageContent, or AudioContent
+            advice = advice_response.text if hasattr(advice_response, 'text') else str(advice_response)
 
-        await ctx.info("✅ Sampling concept demonstrated (actual sampling pending FastMCP support)")
+            await ctx.info("✅ Received advice from client LLM via sampling")
+
+        except Exception as sampling_error:
+            # Graceful fallback if client doesn't support sampling
+            await ctx.warning(f"⚠️ Sampling not supported by client: {sampling_error}")
+            advice = f"[Fallback - client doesn't support sampling] " \
+                     f"Consider the {conditions} conditions and {temperature} temperature " \
+                     f"when planning your {activity}."
 
         # Step 3: Combine server data + client LLM intelligence
         return f"""

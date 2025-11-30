@@ -124,14 +124,14 @@ Server pushing updates to client:
 - `get_weather_with_logging(location)` - Demonstrates `ctx.info()`, `ctx.warning()`, etc.
 - Progress reporting via `ctx.report_progress()`
 
-### Section 7: Sampling (Concept Demonstration)
+### Section 7: Sampling
 
 Server requesting LLM from client:
 
-- `get_weather_advice(location, activity)` - Demonstrates sampling CONCEPT
+- `get_weather_advice(location, activity)` - Uses `ctx.sample()` to get personalized advice
 - Server provides data, client provides intelligence
 
-> ⚠️ **Note**: `ctx.sample()` is part of the MCP specification but is **NOT yet implemented in FastMCP**. The tool simulates the concept for teaching purposes. The MCP SDK contains the types (`CreateMessageRequest`, `SamplingCapability`) but they're not exposed via Context yet.
+> **Note**: `ctx.sample()` is available in **FastMCP 2.0+**. The client must support sampling capability (Claude Desktop ✅, Pydantic AI ✅). If the client doesn't support sampling, the tool falls back gracefully.
 
 ## Key Files
 
