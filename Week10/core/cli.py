@@ -31,7 +31,9 @@ class CommandAutoSuggest(AutoSuggest):
 
             if cmd in self.prompt_dict:
                 prompt = self.prompt_dict[cmd]
-                return Suggestion(f" {prompt.arguments[0].name}")
+                # Only suggest argument if prompt has arguments
+                if prompt.arguments and len(prompt.arguments) > 0:
+                    return Suggestion(f" {prompt.arguments[0].name}")
 
         return None
 
@@ -87,12 +89,17 @@ class UnifiedCompleter(Completer):
                 cmd = parts[0]
 
                 if cmd in self.prompt_dict:
-                    for id in self.resources:
-                        yield Completion(
-                            id,
-                            start_position=0,
-                            display=id,
-                        )
+                    # Show prompt arguments, not resources
+                    prompt = self.prompt_dict[cmd]
+                    if prompt.arguments:
+                        for arg in prompt.arguments:
+                            required = "(required)" if arg.required else "(optional)"
+                            yield Completion(
+                                f"<{arg.name}>",
+                                start_position=0,
+                                display=f"<{arg.name}>",
+                                display_meta=f"{arg.description or arg.name} {required}",
+                            )
                 return
 
             if len(parts) >= 2:

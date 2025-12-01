@@ -123,6 +123,62 @@ Server pushing updates to client:
 
 - `get_weather_with_logging(location)` - Demonstrates `ctx.info()`, `ctx.warning()`, etc.
 - Progress reporting via `ctx.report_progress()`
+- `toggle_debug_mode` - Enable/disable debug notifications
+- `get_debug_mode` - Check current debug state
+
+#### Client-Side: Handling Notifications
+
+The client needs callbacks to receive server notifications:
+
+```python
+# mcp_client.py - logging_callback for ctx.info(), ctx.debug(), etc.
+async def default_logging_callback(params: types.LoggingMessageNotificationParams) -> None:
+    level_prefixes = {
+        "debug": "🔍 [DEBUG]",
+        "info": "ℹ️  [INFO]",
+        "warning": "⚠️  [WARNING]",
+        "error": "❌ [ERROR]",
+    }
+    prefix = level_prefixes.get(params.level, f"[{params.level.upper()}]")
+
+    # FastMCP sends data as {'msg': 'message'} format
+    data = params.data
+    message = data['msg'] if isinstance(data, dict) and 'msg' in data else str(data)
+    print(f"{prefix} {message}")
+
+# Pass to MCPClient - logging_callback is used by default
+client = MCPClient(
+    command="python3",
+    args=["stoopid_wx_server.py"],
+    logging_callback=default_logging_callback,  # Optional, uses default if omitted
+)
+```
+
+#### Client-Side: Handling Progress
+
+Progress updates from `ctx.report_progress()` are handled via `progress_callback`:
+
+```python
+# mcp_client.py - progress_callback for ctx.report_progress()
+async def default_progress_callback(
+    progress: float, total: float | None, message: str | None
+) -> None:
+    if total is not None:
+        pct = int((progress / total) * 100)
+        msg = f"📊 [PROGRESS] {pct}% ({progress}/{total})"
+    else:
+        msg = f"📊 [PROGRESS] {progress}"
+    if message:
+        msg += f" - {message}"
+    print(msg)
+
+# Progress callback is passed to call_tool()
+result = await client.call_tool(
+    "get_weather_with_logging",
+    {"location": "Seattle"},
+    progress_callback=default_progress_callback  # Optional, uses default if omitted
+)
+```
 
 ### Section 7: Sampling
 
@@ -132,6 +188,57 @@ Server requesting LLM from client:
 - Server provides data, client provides intelligence
 
 > **Note**: `ctx.sample()` is available in **FastMCP 2.0+**. The client must support sampling capability (Claude Desktop ✅, Pydantic AI ✅). If the client doesn't support sampling, the tool falls back gracefully.
+
+#### Implementing a Sampling Handler
+
+Our CLI implements `sampling_handler` in `stoopid_wx_cli.py` to support server-initiated LLM requests:
+
+```python
+async def sampling_handler(
+    context: RequestContext,
+    params: types.CreateMessageRequestParams,
+) -> types.CreateMessageResult | types.ErrorData:
+    """Handle sampling requests from MCP servers."""
+
+    # Convert MCP messages to Anthropic format
+    anthropic_messages = []
+    for msg in params.messages:
+        content_text = msg.content.text if hasattr(msg.content, 'text') else str(msg.content)
+        anthropic_messages.append({"role": msg.role, "content": content_text})
+
+    # Call Claude API
+    response = client.messages.create(
+        model=claude_model,
+        max_tokens=params.maxTokens,
+        system=params.systemPrompt or "",
+        messages=anthropic_messages,
+    )
+
+    # Return as CreateMessageResult
+    return types.CreateMessageResult(
+        role="assistant",
+        content=types.TextContent(type="text", text=response.content[0].text),
+        model=claude_model,
+        stopReason="endTurn"
+    )
+```
+
+Pass the handler when creating the client:
+
+```python
+doc_client = MCPClient(
+    command="python3",
+    args=["stoopid_wx_server.py"],
+    sampling_callback=sampling_handler,  # Enable sampling!
+)
+```
+
+The flow is:
+1. Server tool calls `ctx.sample(messages=[...], max_tokens=200)`
+2. MCP protocol sends sampling request to client
+3. Client's `sampling_handler` receives the request
+4. Handler calls Claude API and returns `CreateMessageResult`
+5. Server receives the LLM response and continues
 
 ## Key Files
 
@@ -152,9 +259,23 @@ await client.list_resources()  # Get available resources
 await client.list_prompts()    # Get available prompts
 
 # Execution
-await client.call_tool(name, args)      # Execute a tool
-await client.read_resource(uri)          # Read resource data
-await client.get_prompt(name, args)      # Get prompt template
+await client.call_tool(name, args)                    # Execute a tool
+await client.call_tool(name, args, progress_callback) # With progress handler
+await client.read_resource(uri)                       # Read resource data
+await client.get_prompt(name, args)                   # Get prompt template
+```
+
+## MCPClient Constructor
+
+```python
+MCPClient(
+    command="python3",
+    args=["server.py"],
+    env=None,                    # Optional environment variables
+    sampling_callback=None,      # Handler for ctx.sample() requests
+    logging_callback=None,       # Handler for ctx.info()/debug()/warning()/error()
+                                 # Uses default_logging_callback if not provided
+)
 ```
 
 ## CLI Usage
@@ -203,6 +324,27 @@ def my_prompt(location: str) -> str:
 ```
 
 ## Troubleshooting
+
+### "ctx Missing required argument" error
+
+If you see this error when using `ctx: Context` in a tool:
+```
+ValidationError: 1 validation error for call[your_tool]
+ctx
+  Missing required argument
+```
+
+**Cause**: Wrong Context import. There are two `Context` classes with different module paths!
+
+```python
+# ❌ WRONG - this Context won't be auto-injected
+from mcp.server.fastmcp import Context
+
+# ✅ CORRECT - this Context gets auto-injected by FastMCP
+from fastmcp import Context
+```
+
+FastMCP's `find_kwarg_by_type` looks for `fastmcp.server.context.Context`. Using the MCP wrapper breaks context injection.
 
 ### "Module not found" errors
 ```bash

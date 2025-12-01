@@ -26,10 +26,22 @@ PREREQUISITES:
 # ==============================================================================
 
 import os
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from serpapi import Client
+
+# ==============================================================================
+# LOGGING CONFIGURATION
+# ==============================================================================
+# FastMCP uses Python's logging module internally. By default it logs at DEBUG
+# level, which shows "Sending INFO to client:" messages on stderr.
+# Set to WARNING or higher to suppress these internal debug messages.
+# This is separate from our ctx.debug() notifications to the client!
+
+logging.getLogger("mcp").setLevel(logging.WARNING)
+logging.getLogger("fastmcp").setLevel(logging.WARNING)
 
 # ==============================================================================
 # ENVIRONMENT SETUP
@@ -494,7 +506,110 @@ def get_config_file() -> str:
 # FastMCP provides built-in logging that becomes MCP notifications
 # Import the logging utilities
 
-from mcp.server.fastmcp import Context
+# IMPORTANT: Import Context from fastmcp, not mcp.server.fastmcp
+# These are different types and using the wrong one breaks ctx injection!
+from fastmcp import Context
+
+# ==============================================================================
+# SERVER STATE: Debug Mode Toggle
+# ==============================================================================
+# This demonstrates how a server can maintain state that affects its behavior.
+# In a real server, you might use this for:
+# - Verbose/quiet modes
+# - Feature flags
+# - User preferences
+#
+# Note: This state is per-server-instance. If the server restarts, it resets.
+# ==============================================================================
+
+_debug_mode_enabled = True  # Default: debug messages are shown
+
+
+@mcp.tool(
+    name="toggle_debug_mode",
+    description="Toggle debug message visibility on/off. Returns current state after toggle."
+)
+async def toggle_debug_mode(ctx: Context) -> str:
+    """
+    Toggle whether debug-level notifications are shown.
+
+    SERVER STATE CONCEPT:
+    ---------------------
+    MCP servers can maintain internal state that persists across tool calls.
+    This tool demonstrates:
+    1. Server-side state management (the _debug_mode_enabled flag)
+    2. Tools that modify server behavior
+    3. Using notifications to confirm state changes
+
+    When debug mode is OFF:
+    - ctx.debug() calls are suppressed (not sent to client)
+    - ctx.info(), ctx.warning(), ctx.error() still work normally
+    - ctx.report_progress() still works normally
+
+    When debug mode is ON (default):
+    - All notification levels are sent to client
+
+    Args:
+        ctx: MCP Context for sending notifications
+
+    Returns:
+        str: Current debug mode state after toggling
+
+    Teaching Notes:
+        - Server state persists for the lifetime of the server process
+        - Tools can read AND modify server state
+        - This is useful for: feature flags, user preferences, caching
+        - State is NOT shared between server instances
+    """
+    global _debug_mode_enabled
+
+    # Toggle the state
+    _debug_mode_enabled = not _debug_mode_enabled
+
+    # Notify about the change
+    new_state = "ON" if _debug_mode_enabled else "OFF"
+    await ctx.info(f"🔧 Debug mode toggled: now {new_state}")
+
+    if _debug_mode_enabled:
+        await ctx.debug("🔍 Debug messages like this one will now appear")
+    else:
+        await ctx.info("ℹ️  Debug messages are now hidden (this is an INFO message)")
+
+    return f"Debug mode is now {new_state}. Debug-level notifications are {'visible' if _debug_mode_enabled else 'hidden'}."
+
+
+@mcp.tool(
+    name="get_debug_mode",
+    description="Check current debug mode state without changing it."
+)
+async def get_debug_mode() -> str:
+    """
+    Get the current debug mode state.
+
+    This is a simple read-only tool that returns server state.
+    Useful for checking configuration without side effects.
+
+    Returns:
+        str: Current debug mode state
+    """
+    state = "ON" if _debug_mode_enabled else "OFF"
+    return f"Debug mode is currently {state}"
+
+
+async def debug_log(ctx: Context, message: str) -> None:
+    """
+    Helper function that respects the debug mode toggle.
+
+    Use this instead of ctx.debug() directly when you want debug messages
+    to be controllable via toggle_debug_mode.
+
+    Args:
+        ctx: MCP Context
+        message: Debug message to send (only if debug mode is ON)
+    """
+    if _debug_mode_enabled:
+        await ctx.debug(message)
+
 
 @mcp.tool(
     name="get_weather_with_logging",
@@ -546,7 +661,8 @@ async def get_weather_with_logging(location: str, ctx: Context) -> str:
         await ctx.error("❌ SERPAPI_API_KEY not configured!")
         return "Error: SERPAPI_API_KEY environment variable not set."
 
-    await ctx.debug("✓ API key found")
+    # Use debug_log helper - respects the toggle_debug_mode setting
+    await debug_log(ctx, "✓ API key found")
 
     # Report progress (step 2 of 3)
     await ctx.report_progress(2, 3, "Querying weather service...")
@@ -642,14 +758,26 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
         - Client controls which LLM is used and its parameters
         - Sampling requires client permission (security consideration)
     """
-    await ctx.info(f"🎯 Getting weather advice for {activity} in {location}")
+    # =================================================================
+    # DEMONSTRATION: Using notifications to show sampling workflow
+    # These ctx.info(), ctx.report_progress() calls push updates
+    # to the client in real-time, making the process transparent.
+    # =================================================================
+
+    await ctx.info(f"🎯 Starting weather advice request for {activity} in {location}")
+    await ctx.report_progress(0, 4, "Initializing weather advice request...")
 
     # Step 1: Get the weather data (server's job)
+    await ctx.report_progress(1, 4, "Step 1/4: Validating API credentials...")
     api_key = os.getenv("SERPAPI_API_KEY")
     if not api_key:
+        await ctx.error("❌ SERPAPI_API_KEY not configured!")
         return "Error: SERPAPI_API_KEY not set"
 
     try:
+        await ctx.report_progress(2, 4, "Step 2/4: Fetching weather data from SerpAPI...")
+        await ctx.info("🌐 Querying weather service...")
+
         client = Client(api_key=api_key)
         params = {"q": f"weather in {location}", "hl": "en", "gl": "us"}
         results = client.search(engine="google", params=params)
@@ -660,7 +788,7 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
 
         weather_data = f"Temperature: {temperature}, Conditions: {conditions}"
 
-        await ctx.info(f"📊 Weather data: {weather_data}")
+        await ctx.info(f"📊 Weather data retrieved: {weather_data}")
 
         # Step 2: Use SAMPLING to get advice from CLIENT'S LLM
         # ================================================================
@@ -677,7 +805,11 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
         # - Custom clients: Need sampling_handler implementation
         # ================================================================
 
-        await ctx.info("🤖 Requesting advice from client LLM via sampling...")
+        # Step 3: Use SAMPLING to get advice from CLIENT'S LLM
+        await ctx.report_progress(3, 4, "Step 3/4: Consulting LLM for personalized advice...")
+        await ctx.info("🤖 Just a sec, consulting the client's LLM via sampling...")
+        # Use debug_log helper - respects the toggle_debug_mode setting
+        await debug_log(ctx, "This is where the magic happens - server asks CLIENT for LLM help!")
 
         sampling_prompt = f"""
 Given the following weather conditions:
@@ -693,6 +825,7 @@ this is a good idea and any precautions they should take.
         try:
             # ctx.sample() asks the CLIENT's LLM to generate a response
             # The client controls which model is used!
+            await ctx.info("⏳ Waiting for client LLM response...")
             advice_response = await ctx.sample(
                 messages=sampling_prompt,
                 max_tokens=200,
@@ -703,16 +836,21 @@ this is a good idea and any precautions they should take.
             # Returns TextContent, ImageContent, or AudioContent
             advice = advice_response.text if hasattr(advice_response, 'text') else str(advice_response)
 
-            await ctx.info("✅ Received advice from client LLM via sampling")
+            await ctx.info("✅ Got it! Client LLM returned personalized advice")
 
         except Exception as sampling_error:
             # Graceful fallback if client doesn't support sampling
             await ctx.warning(f"⚠️ Sampling not supported by client: {sampling_error}")
+            await ctx.info("📝 Using fallback advice generation (no LLM)")
             advice = f"[Fallback - client doesn't support sampling] " \
                      f"Consider the {conditions} conditions and {temperature} temperature " \
                      f"when planning your {activity}."
 
-        # Step 3: Combine server data + client LLM intelligence
+        # Step 4: Combine server data + client LLM intelligence
+        await ctx.report_progress(4, 4, "Step 4/4: Combining results...")
+        await ctx.info("🔄 Combining weather data with personalized advice...")
+        await ctx.info("✨ All done! Here's your weather advice:")
+
         return f"""
 🌤️ Weather Report for {location}:
 {weather_data}
@@ -722,7 +860,7 @@ this is a good idea and any precautions they should take.
 """
 
     except Exception as e:
-        await ctx.error(f"Error: {str(e)}")
+        await ctx.error(f"❌ Error: {str(e)}")
         return f"Error getting weather advice: {str(e)}"
 
 

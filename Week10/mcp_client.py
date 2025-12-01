@@ -1,22 +1,93 @@
 import sys
 import asyncio
-from typing import Optional, Any
+from typing import Optional, Any, Callable, Awaitable
 from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
+from mcp.shared.context import RequestContext
 from pydantic import AnyUrl
-import json 
+import json
+
+# Type alias for sampling callback function
+# The server calls ctx.sample() -> client's sampling_handler is invoked
+SamplingCallbackType = Callable[
+    [RequestContext, types.CreateMessageRequestParams],
+    Awaitable[types.CreateMessageResult | types.ErrorData]
+]
+
+# Type alias for logging callback function
+# The server calls ctx.info(), ctx.debug(), ctx.warning(), ctx.error()
+# -> client's logging_callback is invoked
+LoggingCallbackType = Callable[
+    [types.LoggingMessageNotificationParams],
+    Awaitable[None]
+]
+
+
+async def default_logging_callback(params: types.LoggingMessageNotificationParams) -> None:
+    """
+    Default handler for server logging notifications.
+
+    When a server calls ctx.info(), ctx.debug(), ctx.warning(), or ctx.error(),
+    this callback receives the notification and displays it to the user.
+
+    The params contain:
+    - level: "debug" | "info" | "notice" | "warning" | "error" | "critical" | "alert" | "emergency"
+    - logger: Optional logger name
+    - data: The actual log message (can be string, dict with 'msg' key, or other)
+    """
+    # Map log levels to display prefixes
+    level_prefixes = {
+        "debug": "🔍 [DEBUG]",
+        "info": "ℹ️  [INFO]",
+        "notice": "📝 [NOTICE]",
+        "warning": "⚠️  [WARNING]",
+        "error": "❌ [ERROR]",
+        "critical": "🚨 [CRITICAL]",
+        "alert": "🚨 [ALERT]",
+        "emergency": "🚨 [EMERGENCY]",
+    }
+
+    prefix = level_prefixes.get(params.level, f"[{params.level.upper()}]")
+
+    # Extract message from data
+    # FastMCP sends data as {'msg': 'message', 'extra': None} format
+    data = params.data
+    if isinstance(data, dict) and 'msg' in data:
+        message = data['msg']
+    elif data is not None:
+        message = str(data)
+    else:
+        message = ""
+
+    print(f"{prefix} {message}")
+
 
 class MCPClient:
+    """
+    MCP Client that connects to MCP servers and handles protocol operations.
+
+    Supports:
+    - sampling_callback: For servers that request LLM completions (ctx.sample())
+    - logging_callback: For servers that send notifications (ctx.info(), ctx.debug(), etc.)
+
+    When logging_callback is not provided, uses default_logging_callback which
+    prints server notifications to stdout with level-appropriate prefixes.
+    """
     def __init__(
         self,
         command: str,
         args: list[str],
         env: Optional[dict] = None,
+        sampling_callback: Optional[SamplingCallbackType] = None,
+        logging_callback: Optional[LoggingCallbackType] = None,
     ):
         self._command = command
         self._args = args
         self._env = env
+        self._sampling_callback = sampling_callback
+        # Use default logging callback if none provided - shows server notifications
+        self._logging_callback = logging_callback or default_logging_callback
         self._session: Optional[ClientSession] = None
         self._exit_stack: AsyncExitStack = AsyncExitStack()
 
@@ -30,8 +101,17 @@ class MCPClient:
             stdio_client(server_params)
         )
         _stdio, _write = stdio_transport
+
+        # Pass callbacks to ClientSession:
+        # - sampling_callback: Enables servers to request LLM completions (ctx.sample())
+        # - logging_callback: Enables servers to send notifications (ctx.info(), etc.)
         self._session = await self._exit_stack.enter_async_context(
-            ClientSession(_stdio, _write)
+            ClientSession(
+                _stdio,
+                _write,
+                sampling_callback=self._sampling_callback,
+                logging_callback=self._logging_callback,
+            )
         )
         await self._session.initialize()
 
@@ -48,10 +128,35 @@ class MCPClient:
         return result.tools
         
     async def call_tool(
-        self, tool_name: str, tool_input: dict
+        self, tool_name: str, tool_input: dict, progress_callback: Optional[Callable] = None
     ) -> types.CallToolResult | None:
-        # TODO: Call a particular tool and return the result
-        return await self.session().call_tool(tool_name, tool_input)
+        """
+        Call a tool on the MCP server.
+
+        Args:
+            tool_name: Name of the tool to call
+            tool_input: Arguments to pass to the tool
+            progress_callback: Optional callback for progress notifications.
+                              Called with (progress: float, total: float | None, message: str | None)
+                              when server calls ctx.report_progress()
+
+        If no progress_callback is provided, uses a default that prints progress to stdout.
+        """
+        # Default progress callback - prints progress updates
+        async def default_progress_callback(
+            progress: float, total: float | None, message: str | None
+        ) -> None:
+            if total is not None:
+                pct = int((progress / total) * 100)
+                msg = f"📊 [PROGRESS] {pct}% ({progress}/{total})"
+            else:
+                msg = f"📊 [PROGRESS] {progress}"
+            if message:
+                msg += f" - {message}"
+            print(msg)
+
+        callback = progress_callback or default_progress_callback
+        return await self.session().call_tool(tool_name, tool_input, progress_callback=callback)
 
     async def list_prompts(self) -> list[types.Prompt]:
         result = await self.session().list_prompts()

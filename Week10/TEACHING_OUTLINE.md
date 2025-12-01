@@ -346,7 +346,7 @@ async def my_tool(location: str, ctx: Context) -> str:
     return "Result"
 ```
 
-#### Slide 34: Notification Methods
+#### Slide 34: Server-Side Notification Methods
 | Method | Purpose |
 |--------|---------|
 | `ctx.info()` | Informational message |
@@ -355,10 +355,81 @@ async def my_tool(location: str, ctx: Context) -> str:
 | `ctx.error()` | Error notification |
 | `ctx.report_progress()` | Progress bar updates |
 
-#### Slide 35: Client Handling
-- Client decides how to display notifications
-- Options: Log to console, update UI, ignore
-- Fire-and-forget (no response needed)
+#### Slide 34.1: Debug Mode Toggle
+Server can control notification verbosity:
+```python
+# Tools for toggling debug visibility
+@mcp.tool(name="toggle_debug_mode")
+async def toggle_debug_mode(ctx: Context) -> str:
+    global _debug_mode_enabled
+    _debug_mode_enabled = not _debug_mode_enabled
+    return f"Debug mode is now {'ON' if _debug_mode_enabled else 'OFF'}"
+
+# Helper that respects the toggle
+async def debug_log(ctx: Context, message: str) -> None:
+    if _debug_mode_enabled:
+        await ctx.debug(message)
+```
+
+#### Slide 35: Client-Side: logging_callback
+Client handles server notifications via `logging_callback`:
+```python
+async def default_logging_callback(params: types.LoggingMessageNotificationParams) -> None:
+    level_prefixes = {
+        "debug": "🔍 [DEBUG]",
+        "info": "ℹ️  [INFO]",
+        "warning": "⚠️  [WARNING]",
+        "error": "❌ [ERROR]",
+    }
+    prefix = level_prefixes.get(params.level, f"[{params.level.upper()}]")
+    data = params.data
+    message = data['msg'] if isinstance(data, dict) and 'msg' in data else str(data)
+    print(f"{prefix} {message}")
+
+# Pass to MCPClient (default provided if omitted)
+client = MCPClient(command="python3", args=["server.py"], logging_callback=default_logging_callback)
+```
+
+#### Slide 35.1: Client-Side: progress_callback
+Progress updates from `ctx.report_progress()` handled via `progress_callback`:
+```python
+async def default_progress_callback(progress: float, total: float | None, message: str | None) -> None:
+    if total is not None:
+        pct = int((progress / total) * 100)
+        msg = f"📊 [PROGRESS] {pct}% ({progress}/{total})"
+    else:
+        msg = f"📊 [PROGRESS] {progress}"
+    if message:
+        msg += f" - {message}"
+    print(msg)
+
+# Passed to call_tool() (default provided if omitted)
+result = await client.call_tool("tool_name", args, progress_callback=default_progress_callback)
+```
+
+#### Slide 35.2: Complete Notification Flow
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   NOTIFICATION FLOW                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  SERVER                                CLIENT                    │
+│  ──────                                ──────                    │
+│                                                                  │
+│  await ctx.info("Starting...")                                  │
+│         ──────────────────────────────────→                     │
+│                                 logging_callback receives        │
+│                                 LoggingMessageNotificationParams │
+│                                 → Print "ℹ️  [INFO] Starting..." │
+│                                                                  │
+│  await ctx.report_progress(1, 3, "Step 1...")                   │
+│         ──────────────────────────────────→                     │
+│                                 progress_callback receives       │
+│                                 (1, 3, "Step 1...")             │
+│                                 → Print "📊 [PROGRESS] 33%..."  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -414,10 +485,95 @@ async def get_weather_advice(location: str, activity: str, ctx: Context) -> str:
 | Claude Desktop | ✅ Supported |
 | Pydantic AI | ✅ Supported |
 | Custom clients | Need `sampling_handler` |
-| Our CLI (`stoopid_wx_cli.py`) | ⚠️ Falls back gracefully |
+| Our CLI (`stoopid_wx_cli.py`) | ✅ Implemented! |
 
 - Always wrap `ctx.sample()` in try/except for graceful fallback
 - Tool remains functional even if client doesn't support sampling
+
+#### Slide 40.1: Implementing sampling_handler (Client Side)
+
+The client needs a `sampling_handler` to respond to server's `ctx.sample()` calls:
+
+```python
+# stoopid_wx_cli.py - The CLIENT side
+
+async def sampling_handler(
+    context: RequestContext,
+    params: types.CreateMessageRequestParams,
+) -> types.CreateMessageResult | types.ErrorData:
+    """Handle sampling requests from MCP servers."""
+
+    # Server sends: messages, systemPrompt, maxTokens, temperature
+    # Client uses its own LLM to generate response
+
+    # Convert MCP messages to Anthropic format
+    anthropic_messages = []
+    for msg in params.messages:
+        content_text = msg.content.text if hasattr(msg.content, 'text') else str(msg.content)
+        anthropic_messages.append({"role": msg.role, "content": content_text})
+
+    # Call Claude API - CLIENT controls which model!
+    response = anthropic.Anthropic().messages.create(
+        model=claude_model,  # Client's choice, not server's
+        max_tokens=params.maxTokens,
+        system=params.systemPrompt or "",
+        messages=anthropic_messages,
+    )
+
+    # Return CreateMessageResult to server
+    return types.CreateMessageResult(
+        role="assistant",
+        content=types.TextContent(type="text", text=response.content[0].text),
+        model=claude_model,
+        stopReason="endTurn"
+    )
+```
+
+#### Slide 40.2: Passing sampling_handler to MCPClient
+
+```python
+# Create client with sampling support
+doc_client = MCPClient(
+    command="python3",
+    args=["stoopid_wx_server.py"],
+    sampling_callback=sampling_handler,  # <-- Enable sampling!
+)
+```
+
+#### Slide 40.3: The Complete Sampling Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SAMPLING FLOW                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  CLIENT                              SERVER                     │
+│  ──────                              ──────                     │
+│                                                                 │
+│  1. call_tool("get_weather_advice")                            │
+│         ──────────────────────────────────→                    │
+│                                                                 │
+│                              2. Fetch weather from SerpAPI      │
+│                                                                 │
+│                              3. ctx.sample(messages=[...])     │
+│         ←──────────────────────────────────                    │
+│                                                                 │
+│  4. sampling_handler receives request                          │
+│  5. Call Claude API with params                                │
+│  6. Return CreateMessageResult                                 │
+│         ──────────────────────────────────→                    │
+│                                                                 │
+│                              7. Receive LLM response           │
+│                              8. Combine with weather data      │
+│                              9. Return final result            │
+│         ←──────────────────────────────────                    │
+│                                                                 │
+│  10. Display personalized weather advice                       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Insight**: Server provides DATA, Client provides INTELLIGENCE
 
 ---
 
@@ -432,9 +588,9 @@ python3 mcp_client.py
 
 #### Slide 42: Demo 1 - Discovery
 Show the client discovering:
-- 3 tools: `get_weather`, `get_weather_with_logging`, `get_weather_advice`
+- 5 tools: `get_weather`, `get_weather_with_logging`, `get_weather_advice`, `toggle_debug_mode`, `get_debug_mode`
 - 3 resources: `file://readme/`, `data://app-status`, `file://config/`
-- 4 prompts: `what_is_the_hip_weather_report`, `weather_with_context`, `multi_resource_prompt`
+- 3 prompts: `what_is_the_hip_weather_report`, `weather_with_context`, `multi_resource_prompt`
 
 #### Slide 43: Demo 2 - Tool Execution
 ```python
@@ -450,6 +606,8 @@ python3 stoopid_wx_cli.py
 - Use `@` for resource autocomplete
 - Use `/what_is_the_hip_weather_report Portland`
 - Use `/weather_with_context Seattle`
+- Watch notifications appear (📊 [PROGRESS], ℹ️ [INFO], etc.)
+- Toggle debug mode: "toggle debug mode" → server calls `toggle_debug_mode`
 
 #### Slide 45: Demo 4 - Resource Mentions
 ```
@@ -483,8 +641,10 @@ MCP = Protocol (standard communication)
 |---------|------------|
 | Resource autocomplete | Type `@` to see available resources |
 | Prompt commands | Type `/` to see available prompts |
+| Prompt argument hints | Type `/prompt_name ` (with space) to see required/optional args |
 | Resource mentions | `@file://readme/ <question>` |
 | Prompt execution | `/weather_with_context Seattle` |
+| Notifications display | Automatic: 📊 [PROGRESS], ℹ️ [INFO], 🔍 [DEBUG], ⚠️ [WARNING], ❌ [ERROR] |
 
 #### Slide 49: Next Steps
 - Build your own MCP tools
@@ -532,10 +692,27 @@ Create a `mcp_config.json` file with roots configuration and understand how it l
 
 | File | Teaching Focus |
 |------|----------------|
-| `mcp_client.py` | Client implementation, discovery, execution |
+| `mcp_client.py` | Client implementation, discovery, callbacks (`logging_callback`, `progress_callback`) |
 | `stoopid_wx_server.py` | All 7 teaching sections with detailed docstrings |
-| `stoopid_wx_cli.py` | Full application connecting client to server |
-| `core/cli_chat.py` | Resource mentions, prompt commands, `list_resource_uris()` |
-| `core/cli.py` | Autocomplete for `@` resources and `/` prompts |
+| `stoopid_wx_cli.py` | Full application connecting client to server, `sampling_handler` |
+| `core/cli_chat.py` | Resource mentions, prompt commands, argument validation |
+| `core/cli.py` | Autocomplete for `@` resources, `/` prompts with argument hints |
 | `mcp_config.json` | Roots configuration example |
 | `README.md` | Full documentation including Roots Configuration |
+
+## Key Implementation Details
+
+### MCPClient Callbacks (mcp_client.py)
+- **logging_callback**: Receives `ctx.info()`, `ctx.debug()`, `ctx.warning()`, `ctx.error()` notifications
+- **progress_callback**: Receives `ctx.report_progress()` updates (passed to `call_tool()`)
+- **sampling_callback**: Passed at construction for servers using `ctx.sample()`
+
+### Server Debug Toggle (stoopid_wx_server.py)
+- `toggle_debug_mode` tool: Flip debug visibility on/off
+- `get_debug_mode` tool: Check current state
+- `debug_log()` helper: Only sends debug if enabled
+
+### CLI Prompt Handling (core/cli_chat.py)
+- Validates required arguments before calling prompt
+- Shows usage hint with missing arguments
+- Maps positional args to named prompt arguments

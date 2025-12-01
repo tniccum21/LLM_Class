@@ -97,23 +97,30 @@ class CliChat(Chat):
         words = query.split()
         command = words[0].replace("/", "")
 
-        # Build arguments dict based on available prompts
-        # Weather server uses "location", document server uses "doc_id"
-        args = {}
-        if len(words) > 1:
-            # Try to match prompt arguments dynamically
-            prompts = await self.list_prompts()
-            prompt = next((p for p in prompts if p.name == command), None)
+        # Look up the prompt to check its arguments
+        prompts = await self.list_prompts()
+        prompt = next((p for p in prompts if p.name == command), None)
 
-            if prompt and prompt.arguments:
-                # Map positional args to prompt argument names
-                for i, arg in enumerate(prompt.arguments):
-                    if i + 1 < len(words):
-                        args[arg.name] = words[i + 1]
-            else:
-                # Fallback: assume first arg is either location or doc_id
-                args["location"] = words[1]
-                args["doc_id"] = words[1]
+        if not prompt:
+            print(f"Unknown prompt: /{command}")
+            return False
+
+        # Check for required arguments
+        required_args = [arg for arg in (prompt.arguments or []) if arg.required]
+        provided_args = words[1:]  # Arguments provided after the command
+
+        if len(provided_args) < len(required_args):
+            missing = [arg.name for arg in required_args[len(provided_args):]]
+            print(f"Missing required argument(s) for /{command}: {', '.join(missing)}")
+            print(f"Usage: /{command} " + " ".join(f"<{arg.name}>" for arg in required_args))
+            return False
+
+        # Build arguments dict by mapping positional args to prompt argument names
+        args = {}
+        if prompt.arguments:
+            for i, arg in enumerate(prompt.arguments):
+                if i < len(provided_args):
+                    args[arg.name] = provided_args[i]
 
         try:
             messages = await self.doc_client.get_prompt(command, args)
