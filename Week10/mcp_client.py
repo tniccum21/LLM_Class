@@ -5,7 +5,8 @@ from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 from mcp.shared.context import RequestContext
-from pydantic import AnyUrl
+from pydantic import AnyUrl, FileUrl
+from pathlib import Path
 import json
 
 # Type alias for sampling callback function
@@ -22,6 +23,79 @@ LoggingCallbackType = Callable[
     [types.LoggingMessageNotificationParams],
     Awaitable[None]
 ]
+
+# Type alias for list_roots callback function
+# When the SERVER requests roots/list, the CLIENT responds with allowed directories
+# This is a security feature - limits where file:// resources can read from
+ListRootsCallbackType = Callable[
+    [RequestContext],
+    Awaitable[types.ListRootsResult | types.ErrorData]
+]
+
+
+def create_roots_callback(roots: list[str]) -> ListRootsCallbackType:
+    """
+    Create a list_roots_callback from a list of directory paths.
+
+    This is the CLIENT-SIDE implementation of MCP roots:
+    - Client DEFINES which directories the server can access
+    - Server REQUESTS this list via roots/list
+    - Server ENFORCES the boundaries when handling file:// resources
+
+    Args:
+        roots: List of absolute directory paths to allow access to
+
+    Returns:
+        A callback function that returns the roots as types.ListRootsResult
+
+    Example:
+        callback = create_roots_callback(["/path/to/Week10", "/path/to/data"])
+        client = MCPClient(command="python3", args=["server.py"], list_roots_callback=callback)
+
+    Security Note:
+        - Only directories explicitly listed are accessible
+        - Use absolute paths to avoid ambiguity
+        - Follow principle of least privilege - grant only what's needed
+    """
+    # Convert paths to Root objects with file:// URIs
+    root_objects = []
+    for root_path in roots:
+        # Resolve to absolute path
+        abs_path = Path(root_path).resolve()
+        # Create file:// URI
+        file_uri = f"file://{abs_path}"
+        root_objects.append(types.Root(
+            uri=FileUrl(file_uri),
+            name=abs_path.name  # Use directory name as human-readable name
+        ))
+
+    async def list_roots_callback(
+        context: RequestContext,
+    ) -> types.ListRootsResult | types.ErrorData:
+        """Return the configured roots when server requests them."""
+        return types.ListRootsResult(roots=root_objects)
+
+    return list_roots_callback
+
+
+def load_roots_from_env(env_var: str = "MCP_ROOTS") -> list[str]:
+    """
+    Load roots configuration from environment variable.
+
+    Args:
+        env_var: Name of environment variable containing comma-separated paths
+
+    Returns:
+        List of root directory paths
+
+    Example in secrets_client.env:
+        MCP_ROOTS=/path/to/Week10,/path/to/shared/data
+    """
+    import os
+    roots_str = os.getenv(env_var, "")
+    if not roots_str:
+        return []
+    return [r.strip() for r in roots_str.split(",") if r.strip()]
 
 
 async def default_logging_callback(params: types.LoggingMessageNotificationParams) -> None:
@@ -70,9 +144,16 @@ class MCPClient:
     Supports:
     - sampling_callback: For servers that request LLM completions (ctx.sample())
     - logging_callback: For servers that send notifications (ctx.info(), ctx.debug(), etc.)
+    - list_roots_callback: For servers that request allowed directories (roots/list)
 
     When logging_callback is not provided, uses default_logging_callback which
     prints server notifications to stdout with level-appropriate prefixes.
+
+    Roots Security Model:
+    - Client DEFINES allowed directories (roots)
+    - Server REQUESTS roots via roots/list
+    - Server ENFORCES access within those directories
+    - This protects the file system from unauthorized access
     """
     def __init__(
         self,
@@ -81,6 +162,7 @@ class MCPClient:
         env: Optional[dict] = None,
         sampling_callback: Optional[SamplingCallbackType] = None,
         logging_callback: Optional[LoggingCallbackType] = None,
+        list_roots_callback: Optional[ListRootsCallbackType] = None,
     ):
         self._command = command
         self._args = args
@@ -88,6 +170,8 @@ class MCPClient:
         self._sampling_callback = sampling_callback
         # Use default logging callback if none provided - shows server notifications
         self._logging_callback = logging_callback or default_logging_callback
+        # list_roots_callback: When provided, enables server to query allowed directories
+        self._list_roots_callback = list_roots_callback
         self._session: Optional[ClientSession] = None
         self._exit_stack: AsyncExitStack = AsyncExitStack()
 
@@ -105,12 +189,14 @@ class MCPClient:
         # Pass callbacks to ClientSession:
         # - sampling_callback: Enables servers to request LLM completions (ctx.sample())
         # - logging_callback: Enables servers to send notifications (ctx.info(), etc.)
+        # - list_roots_callback: Enables servers to query allowed directories (roots/list)
         self._session = await self._exit_stack.enter_async_context(
             ClientSession(
                 _stdio,
                 _write,
                 sampling_callback=self._sampling_callback,
                 logging_callback=self._logging_callback,
+                list_roots_callback=self._list_roots_callback,
             )
         )
         await self._session.initialize()

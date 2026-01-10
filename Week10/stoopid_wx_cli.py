@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from contextlib import AsyncExitStack
 
-from mcp_client import MCPClient
+from mcp_client import MCPClient, create_roots_callback
 from mcp import types
 from mcp.shared.context import RequestContext
 from core.claude import Claude
@@ -13,8 +13,8 @@ from core.claude import Claude
 from core.cli_chat import CliChat
 from core.cli import CliApp
 
-# Load environment variables from secrets.env (same file as server uses)
-env_path = Path(__file__).parent / "secrets.env"
+# Load environment variables from secrets_client.env (client-specific secrets)
+env_path = Path(__file__).parent / "secrets_client.env"
 if env_path.exists():
     load_dotenv(env_path)
 else:
@@ -151,14 +151,39 @@ async def main():
         else ("python3", ["stoopid_wx_server.py"])
     )
 
+    # ==========================================================================
+    # ROOTS CONFIGURATION - Security boundaries for file:// resources
+    # ==========================================================================
+    # Load roots from MCP_ROOTS env var (comma-separated paths)
+    # This defines which directories the server can access for file:// resources.
+    #
+    # The flow:
+    # 1. Client loads roots from environment variable
+    # 2. Client creates list_roots_callback from those paths
+    # 3. Server calls ctx.list_roots() to get allowed directories
+    # 4. Server enforces boundaries on file operations
+    # ==========================================================================
+    mcp_roots_env = os.getenv("MCP_ROOTS", "")
+    roots = [r.strip() for r in mcp_roots_env.split(",") if r.strip()] if mcp_roots_env else []
+
+    # If no roots configured, default to the Week10 directory for teaching
+    if not roots:
+        roots = [str(Path(__file__).parent.resolve())]
+        print(f"ℹ️  No MCP_ROOTS in env, defaulting to: {roots[0]}")
+
+    # Create the callback that will respond to server's roots/list request
+    roots_callback = create_roots_callback(roots)
+
     async with AsyncExitStack() as stack:
-        # Create MCP client WITH sampling_handler
-        # This enables the server to request LLM completions from us!
+        # Create MCP client WITH sampling_handler AND list_roots_callback
+        # - sampling_callback: Enables server to request LLM completions
+        # - list_roots_callback: Enables server to query allowed directories
         doc_client = await stack.enter_async_context(
             MCPClient(
                 command=command,
                 args=args,
-                sampling_callback=sampling_handler,  # <-- Enable sampling!
+                sampling_callback=sampling_handler,
+                list_roots_callback=roots_callback,  # <-- Enable roots!
             )
         )
         clients["doc_client"] = doc_client

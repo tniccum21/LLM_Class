@@ -1,22 +1,8 @@
 # Environment variables - Global patterns
+# *.env catches all: secrets.env, secrets_client.env, secrets_server.env, .env, etc.
 *.env
-.env
 .env.local
 .env.*.local
-
-# Legacy specific env file exclusions (covered by *.env above)
-Week01/.env
-Week02/.env
-Week03/.env
-Week04/.env
-Week04/secrets.env
-Week05/secrets.env
-Week06/secrets.env
-Week07/secrets.env
-Week08/secrets.env
-Week09/secrets.env
-Week10/secrets.env
-Weekxx/*
 
 # Python
 __pycache__/
@@ -73,3 +59,4 @@ Week07/chroma_ticket_db/
 Week07/ARCHITECTURE.md
 Week07/DESIGN.md
 Weekxx/
+Weekxx - context engineering

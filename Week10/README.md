@@ -56,12 +56,20 @@ By the end of this week, you will understand:
 
 ### 1. Configure Environment
 
-Create `secrets.env` in the Week10 directory:
+Create two secrets files in the Week10 directory:
 
+**`secrets_server.env`** (for the MCP server):
+```env
+SERPAPI_API_KEY=your-serpapi-key-here
+```
+
+**`secrets_client.env`** (for the CLI client):
 ```env
 ANTHROPIC_API_KEY=your-anthropic-key-here
 CLAUDE_MODEL=claude-sonnet-4-20250514
-SERPAPI_API_KEY=your-serpapi-key-here
+
+# Roots: comma-separated directories the server can access
+MCP_ROOTS=/absolute/path/to/Apps_with_AI/Week10
 ```
 
 ### 2. Activate Virtual Environment
@@ -101,14 +109,46 @@ The `stoopid_wx_server.py` file is organized into 7 teaching sections:
 | **Tool** | `get_weather(location)` | Active function - fetches live weather data |
 | **Resource** | `file://readme` | Passive data - returns documentation |
 | **Resource** | `data://app-status` | Passive data - returns app status as JSON |
-| **Prompt** | `what_is_the_hip_weather_report` | Template - George Carlin weather persona |
+| **Prompt** | `hip_weather` | Template - George Carlin weather persona |
 
 ### Section 4: Prompt + Resource Stacking
 
-Prompts that reference other MCP primitives:
+Prompts that **fetch and embed** resource data at generation time:
 
-- `weather_with_context(location)` - Instructs LLM to check status, then get weather
-- `multi_resource_prompt()` - Combines readme and status resources
+| Prompt | Args | Description |
+|--------|------|-------------|
+| `weather_with_context` | `location` (required) | Embeds app status, instructs LLM to call weather tool |
+| `multi_resource` | (none) | Embeds readme + status into system overview prompt |
+
+#### Key Insight: Prompts EMBED Resources
+
+The critical pattern here is that prompts **fetch resources server-side** and embed the data directly into the prompt text. The LLM receives pre-loaded context, not instructions to "read" resources.
+
+```python
+# Server-side: Prompt fetches and embeds resource
+@mcp.prompt(name="weather_with_context", ...)
+def weather_with_context_prompt(location: str) -> str:
+    status_data = get_app_status()  # FETCH the resource
+    return f"""
+    APPLICATION STATUS: {json.dumps(status_data)}  # EMBED in prompt
+    Now get weather for {location}...
+    """
+```
+
+#### Using Prompts in the CLI
+
+```bash
+# Prompt with required argument
+> /weather_with_context Seattle
+
+# Prompt with no arguments
+> /multi_resource
+```
+
+The `multi_resource` prompt demonstrates multi-resource embedding:
+1. Fetches `file://readme` and embeds documentation
+2. Fetches `data://app-status` and embeds status
+3. LLM receives both pre-loaded for synthesis
 
 ### Section 5: Roots (Security)
 
@@ -287,7 +327,9 @@ MCPClient(
 
 ### Using Prompts
 ```
-> /what_is_the_hip_weather_report Portland
+> /hip_weather Portland
+> /weather_with_context Seattle
+> /multi_resource
 ```
 
 ### Resource Mentions
@@ -353,8 +395,8 @@ source ../.venv/bin/activate  # Ensure venv is active
 
 ### "SERPAPI_API_KEY not set"
 ```bash
-# Check secrets.env exists and has the key
-cat secrets.env
+# Check secrets_server.env exists and has the key
+cat secrets_server.env
 ```
 
 ### Python 2.7 errors
@@ -378,23 +420,16 @@ Without roots, a `file://` resource could potentially read ANY file on your syst
 
 Roots create a sandbox - the server can ONLY access files within declared root directories.
 
-### MCP Config File Setup
+### Roots Configuration
 
-Create `mcp_config.json` in the Week10 directory:
+Configure roots in `secrets_client.env` using the `MCP_ROOTS` variable:
 
-```json
-{
-  "mcpServers": {
-    "weather": {
-      "command": "python3",
-      "args": ["stoopid_wx_server.py"],
-      "roots": [
-        "/absolute/path/to/Apps_with_AI/Week10",
-        "/absolute/path/to/shared/data"
-      ]
-    }
-  }
-}
+```env
+# Single directory
+MCP_ROOTS=/absolute/path/to/Apps_with_AI/Week10
+
+# Multiple directories (comma-separated)
+MCP_ROOTS=/path/to/Week10,/path/to/shared/data
 ```
 
 ### How file:// Resources Use Roots

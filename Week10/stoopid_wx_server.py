@@ -16,7 +16,7 @@ OVERVIEW:
 
 PREREQUISITES:
 --------------
-- SERPAPI_API_KEY environment variable (stored in secrets.env)
+- SERPAPI_API_KEY environment variable (stored in secrets_server.env)
 - Required packages: fastmcp, serpapi, python-dotenv
 
 """
@@ -26,10 +26,11 @@ PREREQUISITES:
 # ==============================================================================
 
 import os
+import json
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from fastmcp import FastMCP
+from fastmcp import FastMCP, Context
 from serpapi import Client
 
 # ==============================================================================
@@ -47,10 +48,10 @@ logging.getLogger("fastmcp").setLevel(logging.WARNING)
 # ENVIRONMENT SETUP
 # ==============================================================================
 
-# Load environment variables from secrets.env
+# Load environment variables from secrets_server.env
 # This keeps sensitive API keys out of version control
 # Pattern: ALWAYS use .env type files for secrets, never hardcode credentials
-env_path = Path(__file__).parent / "secrets.env"
+env_path = Path(__file__).parent / "secrets_server.env"
 if env_path.exists():
     load_dotenv(env_path)
     print(f"✓ Loaded environment variables from {env_path}")
@@ -131,7 +132,7 @@ def get_weather(location: str) -> str:
     # Pattern: Fail fast if required credentials are missing
     api_key = os.getenv("SERPAPI_API_KEY")
     if not api_key:
-        return "Error: SERPAPI_API_KEY environment variable not set. Please set it in secrets.env"
+        return "Error: SERPAPI_API_KEY environment variable not set. Please set it in secrets_server.env"
 
     try:
         # Step 2: Initialize SerpAPI Client with API key
@@ -180,8 +181,52 @@ def get_weather(location: str) -> str:
 # ==============================================================================
 # MCP RESOURCE IMPLEMENTATIONS
 # ==============================================================================
+# HELPER FUNCTIONS - Shared data access for Resources and Prompts
+# ==============================================================================
+# IMPORTANT: When prompts need to embed resource data, they can't call the
+# @mcp.resource decorated function directly (it becomes a FunctionResource).
+# Instead, create helper functions that both resources and prompts can use.
+
+def _get_readme_data() -> str:
+    """
+    Helper function to get README content.
+
+    This function is called by BOTH:
+    - The @mcp.resource decorator (for client resource reads)
+    - Prompts that need to EMBED this data
+
+    Returns:
+        str: README content or error message
+    """
+    readme_path = Path(__file__).parent / "README.md"
+    if readme_path.exists():
+        return readme_path.read_text()
+    else:
+        return "README file not found."
+
+
+def _get_app_status_data() -> dict:
+    """
+    Helper function to get application status data.
+
+    This function is called by BOTH:
+    - The @mcp.resource decorator (for client resource reads)
+    - Prompts that need to EMBED this data
+
+    Returns:
+        dict: Application status information
+    """
+    return {
+        "status": "ok",
+        "uptime": 12345,  # In production, calculate actual uptime
+        "hosted_at": mcp.settings.host
+    }
+
+
+# ==============================================================================
 # Resources are PASSIVE data providers - static information the LLM can read
 # Think of resources as "nouns" - things the LLM can ACCESS
+# ==============================================================================
 
 @mcp.resource(uri="file://readme")
 def get_readme() -> str:
@@ -213,13 +258,7 @@ def get_readme() -> str:
         - Always provide fallback for missing files
         - Resources are cacheable by MCP clients
     """
-    # Use Path for platform-independent file operations
-    readme_path = Path(__file__).parent / "README_stoopid_wx_server.md"
-
-    if readme_path.exists():
-        return readme_path.read_text()
-    else:
-        return "README file not found."
+    return _get_readme_data()
 
 
 @mcp.resource(
@@ -261,11 +300,7 @@ def get_application_status() -> dict:
         - mcp.settings provides server configuration access
         - Status endpoints are useful for health checks and monitoring
     """
-    return {
-        "status": "ok",
-        "uptime": 12345,  # In production, calculate actual uptime
-        "hosted_at": mcp.settings.host
-    }
+    return _get_app_status_data()
 
 
 # ==============================================================================
@@ -274,10 +309,13 @@ def get_application_status() -> dict:
 # Prompts are TEMPLATE generators - reusable instruction patterns for LLMs
 # Think of prompts as "prompt engineering as code"
 
-@mcp.prompt
-def what_is_the_hip_weather_report(location: str) -> str:
+@mcp.prompt(
+    name="hip_weather",
+    description="George Carlin 'Hippy-Dippy Weatherman' style report"
+)
+def hip_weather_prompt(location: str) -> str:
     """
-    Generate a weather reporter prompt for the LLM 
+    Generate a weather reporter prompt for the LLM
       in the style of George Carlin's 'Hippy-Dippy Weatherman from the 1960s'.
 
     This prompt demonstrates:
@@ -302,7 +340,7 @@ def what_is_the_hip_weather_report(location: str) -> str:
         str: Formatted prompt instructing LLM to act as weather reporter.
 
     Example Usage (from MCP client):
-        Client lists available prompts → sees "what_is_the_hip_weather_report"
+        Client lists available prompts → sees "hip_weather"
         Client calls prompt with location → receives formatted instruction
         Client sends instruction to LLM → LLM responds as 'hippy-dippy' weather reporter
 
@@ -324,48 +362,58 @@ def what_is_the_hip_weather_report(location: str) -> str:
 # Combining prompts with resources creates powerful context-aware interactions
 # This demonstrates how MCP primitives work TOGETHER, not in isolation
 
-@mcp.prompt
-def weather_with_context(location: str) -> str:
+@mcp.prompt(
+    name="weather_with_context",
+    description="Check app status, then fetch weather for location"
+)
+def weather_with_context_prompt(location: str) -> str:
     """
-    Generate a weather prompt that references available resources.
+    Generate a weather prompt that EMBEDS resource data directly.
 
     This demonstrates PROMPT + RESOURCE STACKING:
-    - The prompt instructs the LLM to use BOTH:
-      1. The get_weather TOOL to fetch live data
-      2. The data://app-status RESOURCE to check service health
+    - The prompt INCLUDES some resource data (not just references it)
+    - This is the KEY insight: prompts can fetch and embed resources!
 
     STACKING PATTERN:
     -----------------
-    Prompt (instructions) + Resource (context) + Tool (action) = Rich interaction
+    Prompt fetches Resource → Embeds data → Instructs LLM to use Tool
 
     Workflow when this prompt is used:
     1. Client requests this prompt with location
-    2. Prompt tells LLM: "Check status resource, then call weather tool"
-    3. LLM reads data://app-status resource
-    4. LLM calls get_weather(location) tool
+    2. SERVER fetches data://app-status resource
+    3. Prompt returns with embedded status + instructions
+    4. LLM sees status context AND gets instruction to call weather tool
     5. LLM synthesizes both into cohesive response
 
     Args:
         location: The location for the weather report
 
     Returns:
-        str: A prompt that instructs the LLM to combine resources and tools
+        str: A prompt with embedded resource data and tool instructions
 
     Teaching Notes:
-        - Prompts can reference OTHER MCP primitives by name
-        - This creates declarative workflows: "do X, then Y, combine Z"
-        - The LLM orchestrates the actual execution
-        - Stacking reduces client-side complexity
+        - Prompts can FETCH and EMBED resource data at generation time
+        - The LLM receives pre-fetched context, not just instructions
+        - This is more reliable than telling LLM to "read" resources
+        - Stacking = Server does the orchestration, not the LLM
     """
+    # FETCH the resource data and embed it in the prompt
+    status_data = _get_app_status_data()
+
     return f"""
-    Before providing the weather report, please:
+    You are providing a weather report with application context.
 
-    1. FIRST: Check the application status by reading the 'data://app-status' resource
+    APPLICATION STATUS (from data://app-status resource):
+    {json.dumps(status_data, indent=2)}
+
+    INSTRUCTIONS:
+    1. Review the application status above
        - If status is not "ok", warn the user about potential data quality issues
+       - Note the uptime and server information
 
-    2. THEN: Get the current weather for {location} using the get_weather tool
+    2. Get the current weather for {location} using the get_weather tool
 
-    3. FINALLY: Provide a comprehensive weather report that includes:
+    3. Provide a comprehensive weather report that includes:
        - The current conditions from the tool
        - A note about data freshness based on the app status
        - A friendly recommendation for the day
@@ -374,42 +422,51 @@ def weather_with_context(location: str) -> str:
     """
 
 
-@mcp.prompt
+@mcp.prompt(
+    name="multi_resource",
+    description="Synthesize readme + status into system overview"
+)
 def multi_resource_prompt() -> str:
     """
-    A prompt demonstrating how to reference MULTIPLE resources.
+    A prompt demonstrating MULTI-RESOURCE EMBEDDING.
 
-    This shows advanced stacking where the LLM should:
-    - Read the README resource for context about capabilities
-    - Read the app-status resource for current state
-    - Synthesize into a system overview
+    This shows advanced stacking where the prompt:
+    - FETCHES the README resource for context about capabilities
+    - FETCHES the app-status resource for current state
+    - EMBEDS both into the prompt for the LLM
 
     Use Case: System documentation and status queries
 
     Returns:
-        str: Instructions for multi-resource synthesis
+        str: Prompt with embedded multi-resource data
 
     Teaching Notes:
-        - Prompts can reference ANY number of resources
-        - Order matters - process foundational context first
-        - LLM handles the orchestration automatically
+        - Prompts can FETCH and EMBED multiple resources
+        - Server does the orchestration, LLM gets pre-loaded context
+        - More reliable than instructing LLM to read resources
     """
-    return """
-    Please provide a comprehensive overview of this weather service:
+    # FETCH both resources and embed them
+    readme_content = _get_readme_data()
+    status_data = _get_app_status_data()
 
-    1. Read the 'file://readme' resource to understand:
-       - What this service does
-       - How to use it
-       - Available features
+    return f"""
+    You are providing a comprehensive system overview.
 
-    2. Read the 'data://app-status' resource to report:
-       - Current operational status
-       - Uptime information
-       - Server health
+    === SERVICE DOCUMENTATION (from file://readme resource) ===
+    {readme_content[:2000]}  # Truncate for prompt size
+    {"... (truncated)" if len(readme_content) > 2000 else ""}
 
-    3. Combine into a professional system status report that a user
-       could use to understand both WHAT this service does and
-       WHETHER it's currently operational.
+    === APPLICATION STATUS (from data://app-status resource) ===
+    {json.dumps(status_data, indent=2)}
+
+    INSTRUCTIONS:
+    Based on the documentation and status above, provide a professional
+    system status report that helps a user understand:
+    1. WHAT this service does and its capabilities
+    2. WHETHER it's currently operational
+    3. Key features and how to use them
+
+    Be concise but comprehensive.
     """
 
 
@@ -470,23 +527,357 @@ Teaching Notes:
 - Resources should gracefully handle denied root access
 """
 
-# Example resource that would benefit from roots configuration
+# ==============================================================================
+# ROOTS IMPLEMENTATION: Request roots from client and enforce boundaries
+# ==============================================================================
+
+# Server-side cache for roots (populated when tools need them)
+_cached_roots: list[str] | None = None
+
+
+def is_path_within_roots(file_path: Path, roots: list[str]) -> bool:
+    """
+    Check if a file path is within any of the allowed root directories.
+
+    This is the SERVER-SIDE ENFORCEMENT of the roots security model:
+    - Client DEFINES which directories are allowed (via list_roots_callback)
+    - Server REQUESTS those roots and VALIDATES all file access against them
+
+    Args:
+        file_path: The absolute path to check
+        roots: List of allowed root directory paths
+
+    Returns:
+        bool: True if the path is within at least one root, False otherwise
+
+    Security Note:
+        - Always resolve paths to absolute to prevent directory traversal attacks
+        - Check that the file path STARTS WITH a root path (is a subdirectory)
+    """
+    file_path = file_path.resolve()
+    for root in roots:
+        root_path = Path(root).resolve()
+        # Check if file_path is equal to or under root_path
+        try:
+            file_path.relative_to(root_path)
+            return True
+        except ValueError:
+            continue
+    return False
+
+
+@mcp.tool(
+    name="get_roots",
+    description="Query the client for allowed root directories (MCP roots/list)"
+)
+async def get_roots_tool(ctx: Context) -> str:
+    """
+    Demonstrate how a server requests roots from the client.
+
+    This is the KEY TEACHING POINT for roots:
+    - Server calls ctx.list_roots() to ask the client "What directories can I access?"
+    - Client responds with a list of Root objects (uri + optional name)
+    - Server then ENFORCES these boundaries on all file:// operations
+
+    The MCP Protocol Flow:
+        Server: "roots/list" request → Client
+        Client: ListRootsResult (list of Root objects) → Server
+
+    Returns:
+        str: JSON showing the roots configuration
+
+    Teaching Notes:
+        - If client doesn't provide roots, the list will be empty
+        - Empty roots = server has no explicit file access permissions
+        - Production servers should ALWAYS check roots before file operations
+    """
+    global _cached_roots
+
+    try:
+        roots = await ctx.list_roots()
+
+        # Cache the roots for use by other tools/resources
+        _cached_roots = [str(r.uri).replace("file://", "") for r in roots]
+
+        if not roots:
+            return json.dumps({
+                "status": "warning",
+                "message": "No roots configured by client",
+                "roots": [],
+                "implication": "Server has no explicit file access permissions"
+            }, indent=2)
+
+        root_info = []
+        for r in roots:
+            root_info.append({
+                "uri": str(r.uri),
+                "name": r.name,
+                "path": str(r.uri).replace("file://", "")
+            })
+
+        return json.dumps({
+            "status": "ok",
+            "message": f"Client granted access to {len(roots)} root(s)",
+            "roots": root_info
+        }, indent=2)
+
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "message": f"Failed to get roots: {str(e)}",
+            "note": "Client may not support roots capability"
+        }, indent=2)
+
+
+@mcp.tool(
+    name="read_file_safe",
+    description="Read a file with roots enforcement (demonstrates secure file access)"
+)
+async def read_file_safe(file_path: str, ctx: Context) -> str:
+    """
+    Demonstrate SECURE file reading with roots enforcement.
+
+    This tool shows the proper pattern for file access:
+    1. Request roots from client (if not cached)
+    2. Validate requested path is within allowed roots
+    3. Only then read the file
+
+    Args:
+        file_path: Path to the file to read (absolute or relative to server)
+        ctx: MCP Context for requesting roots
+
+    Returns:
+        str: File contents if allowed, error message if denied
+
+    Security Pattern:
+        if is_path_within_roots(path, roots):
+            return read_file(path)
+        else:
+            raise AccessDenied("Path not within allowed roots")
+
+    Teaching Notes:
+        - This is how production MCP servers should handle file access
+        - Always validate BEFORE reading, not after
+        - Provide clear error messages for debugging
+    """
+    global _cached_roots
+
+    # Get roots from client if not cached
+    if _cached_roots is None:
+        try:
+            roots = await ctx.list_roots()
+            _cached_roots = [str(r.uri).replace("file://", "") for r in roots]
+        except Exception:
+            _cached_roots = []
+
+    # Resolve the requested path
+    requested_path = Path(file_path)
+    if not requested_path.is_absolute():
+        # Treat relative paths as relative to server directory
+        requested_path = Path(__file__).parent / file_path
+    requested_path = requested_path.resolve()
+
+    # SECURITY CHECK: Validate path is within roots
+    if not _cached_roots:
+        await ctx.warning(f"No roots configured - file access denied for security")
+        return json.dumps({
+            "status": "denied",
+            "reason": "No roots configured by client",
+            "requested_path": str(requested_path),
+            "suggestion": "Configure MCP_ROOTS in secrets_client.env"
+        }, indent=2)
+
+    if not is_path_within_roots(requested_path, _cached_roots):
+        await ctx.warning(f"Access denied: {requested_path} not in allowed roots")
+        return json.dumps({
+            "status": "denied",
+            "reason": "Path not within allowed roots",
+            "requested_path": str(requested_path),
+            "allowed_roots": _cached_roots
+        }, indent=2)
+
+    # Path is valid - read the file
+    await ctx.info(f"Access granted: {requested_path}")
+    if not requested_path.exists():
+        return json.dumps({
+            "status": "not_found",
+            "path": str(requested_path)
+        }, indent=2)
+
+    try:
+        content = requested_path.read_text()
+        return json.dumps({
+            "status": "ok",
+            "path": str(requested_path),
+            "size": len(content),
+            "content": content[:1000] + ("..." if len(content) > 1000 else "")
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "path": str(requested_path),
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool(
+    name="list_files",
+    description="List files in a directory with roots enforcement (demonstrates secure directory listing)"
+)
+async def list_files_tool(directory: str = "", ctx: Context = None) -> str:
+    """
+    List files and directories within allowed roots.
+
+    This tool demonstrates the standard MCP pattern for directory listing:
+    - MCP doesn't have a built-in "list directory" primitive
+    - Instead, implement as a TOOL that respects roots boundaries
+    - Same security pattern as read_file_safe
+
+    Args:
+        directory: Directory path to list (absolute, relative to server, or empty for roots)
+                   If empty, lists contents of each allowed root
+        ctx: MCP Context for requesting roots
+
+    Returns:
+        str: JSON with directory contents or error message
+
+    Teaching Notes:
+        - Directory listing is a common need but NOT a built-in MCP primitive
+        - Implement as a tool that enforces roots security
+        - Empty directory = show what's available in the allowed roots
+        - This enables file discovery within the security sandbox
+    """
+    global _cached_roots
+
+    # Get roots from client if not cached
+    if _cached_roots is None:
+        try:
+            roots = await ctx.list_roots()
+            _cached_roots = [str(r.uri).replace("file://", "") for r in roots]
+        except Exception:
+            _cached_roots = []
+
+    # No roots = no access
+    if not _cached_roots:
+        await ctx.warning("No roots configured - directory access denied")
+        return json.dumps({
+            "status": "denied",
+            "reason": "No roots configured by client",
+            "suggestion": "Configure MCP_ROOTS in secrets_client.env"
+        }, indent=2)
+
+    # If no directory specified, list contents of all roots
+    if not directory:
+        await ctx.info("Listing contents of all allowed roots")
+        result = {
+            "status": "ok",
+            "roots": []
+        }
+        for root in _cached_roots:
+            root_path = Path(root)
+            if root_path.exists() and root_path.is_dir():
+                entries = []
+                try:
+                    for entry in sorted(root_path.iterdir()):
+                        entries.append({
+                            "name": entry.name,
+                            "type": "directory" if entry.is_dir() else "file",
+                            "size": entry.stat().st_size if entry.is_file() else None
+                        })
+                except PermissionError:
+                    entries = [{"error": "Permission denied"}]
+
+                result["roots"].append({
+                    "path": str(root_path),
+                    "entries": entries
+                })
+            else:
+                result["roots"].append({
+                    "path": str(root_path),
+                    "error": "Not found or not a directory"
+                })
+        return json.dumps(result, indent=2)
+
+    # Resolve the requested directory path
+    requested_path = Path(directory)
+    if not requested_path.is_absolute():
+        # Treat relative paths as relative to server directory
+        requested_path = Path(__file__).parent / directory
+    requested_path = requested_path.resolve()
+
+    # SECURITY CHECK: Validate path is within roots
+    if not is_path_within_roots(requested_path, _cached_roots):
+        await ctx.warning(f"Access denied: {requested_path} not in allowed roots")
+        return json.dumps({
+            "status": "denied",
+            "reason": "Path not within allowed roots",
+            "requested_path": str(requested_path),
+            "allowed_roots": _cached_roots
+        }, indent=2)
+
+    # Path is valid - list directory
+    await ctx.info(f"Listing directory: {requested_path}")
+
+    if not requested_path.exists():
+        return json.dumps({
+            "status": "not_found",
+            "path": str(requested_path)
+        }, indent=2)
+
+    if not requested_path.is_dir():
+        return json.dumps({
+            "status": "error",
+            "path": str(requested_path),
+            "error": "Not a directory"
+        }, indent=2)
+
+    try:
+        entries = []
+        for entry in sorted(requested_path.iterdir()):
+            entry_info = {
+                "name": entry.name,
+                "type": "directory" if entry.is_dir() else "file",
+            }
+            if entry.is_file():
+                entry_info["size"] = entry.stat().st_size
+            entries.append(entry_info)
+
+        return json.dumps({
+            "status": "ok",
+            "path": str(requested_path),
+            "count": len(entries),
+            "entries": entries
+        }, indent=2)
+    except PermissionError:
+        return json.dumps({
+            "status": "error",
+            "path": str(requested_path),
+            "error": "Permission denied"
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "path": str(requested_path),
+            "error": str(e)
+        }, indent=2)
+
+
+# Example resource that demonstrates roots - now with enforcement
 @mcp.resource(uri="file://config")
 def get_config_file() -> str:
     """
     Demonstrate a resource that reads from the file system.
 
+    NOTE: Resources run synchronously and can't call ctx.list_roots().
+    For resources, roots enforcement would typically be done at the
+    MCP transport layer or by using tools instead.
+
     In production with roots configured:
-    - This would only work if the config file is within a declared root
-    - MCP client enforces the boundary
+    - Use tools (like read_file_safe) for secure file access
+    - Or implement roots checking at the resource registration level
 
     Returns:
         str: Config file contents or error message
-
-    Teaching Notes:
-        - This resource assumes roots are properly configured
-        - Without roots, this is a security risk
-        - Always validate paths are within expected boundaries
     """
     config_path = Path(__file__).parent / "config.json"
 
@@ -504,11 +895,8 @@ def get_config_file() -> str:
 # This is the reverse of normal request/response - server initiates!
 
 # FastMCP provides built-in logging that becomes MCP notifications
-# Import the logging utilities
-
-# IMPORTANT: Import Context from fastmcp, not mcp.server.fastmcp
+# IMPORTANT: Context is imported at the top from fastmcp, not mcp.server.fastmcp
 # These are different types and using the wrong one breaks ctx injection!
-from fastmcp import Context
 
 # ==============================================================================
 # SERVER STATE: Debug Mode Toggle
@@ -915,13 +1303,16 @@ if __name__ == "__main__":
     print("   • Tool: get_weather(location)")
     print("   • Resource: file://readme")
     print("   • Resource: data://app-status")
-    print("   • Prompt: what_is_the_hip_weather_report(location)")
+    print("   • Prompt: hip_weather(location)")
     print()
     print("Section 4: Prompt + Resource Stacking")
     print("   • Prompt: weather_with_context(location)")
-    print("   • Prompt: multi_resource_prompt()")
+    print("   • Prompt: multi_resource()")
     print()
     print("Section 5: Roots (File System Boundaries)")
+    print("   • Tool: get_roots() - query client for allowed directories")
+    print("   • Tool: read_file_safe(path) - read file with roots enforcement")
+    print("   • Tool: list_files(directory) - list directory with roots enforcement")
     print("   • Resource: file://config")
     print("   • Documentation in docstrings")
     print()

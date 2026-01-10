@@ -9,6 +9,7 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.buffer import Buffer
 
 from core.cli_chat import CliChat
+from core.claude import ClaudeAPIError
 
 
 class CommandAutoSuggest(AutoSuggest):
@@ -214,5 +215,8 @@ class CliApp:
                 response = await self.agent.run(user_input)
                 print(f"\nResponse:\n{response}")
 
+            except ClaudeAPIError as e:
+                # User-friendly API errors (model not found, auth failed, etc.)
+                print(f"\n{e}\n")
             except KeyboardInterrupt:
                 break

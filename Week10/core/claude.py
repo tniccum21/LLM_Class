@@ -1,5 +1,10 @@
-from anthropic import Anthropic
+from anthropic import Anthropic, APIError, AuthenticationError, NotFoundError, RateLimitError
 from anthropic.types import Message
+
+
+class ClaudeAPIError(Exception):
+    """Wrapper for Claude API errors with user-friendly messages."""
+    pass
 
 
 class Claude:
@@ -60,5 +65,29 @@ class Claude:
         if system:
             params["system"] = system
 
-        message = self.client.messages.create(**params)
-        return message
+        try:
+            message = self.client.messages.create(**params)
+            return message
+        except NotFoundError as e:
+            # Model name typo or invalid model
+            raise ClaudeAPIError(
+                f"❌ Model not found: '{self.model}'\n"
+                f"   Check CLAUDE_MODEL in secrets_client.env\n"
+                f"   Valid models: claude-sonnet-4-20250514, claude-haiku-3-5-20241022, etc."
+            ) from e
+        except AuthenticationError as e:
+            raise ClaudeAPIError(
+                f"❌ Authentication failed\n"
+                f"   Check ANTHROPIC_API_KEY in secrets_client.env\n"
+                f"   Get your key at: https://console.anthropic.com/"
+            ) from e
+        except RateLimitError as e:
+            raise ClaudeAPIError(
+                f"❌ Rate limit exceeded\n"
+                f"   Wait a moment and try again, or check your API usage limits."
+            ) from e
+        except APIError as e:
+            raise ClaudeAPIError(
+                f"❌ API error: {e.message}\n"
+                f"   Status: {e.status_code}"
+            ) from e

@@ -1,4 +1,4 @@
-# Week09 - Stoopid Weather Server Requirements
+# Week10 - Stoopid Weather Server Requirements
 # MCP server providing weather information via SerpAPI
 
 # Core MCP Framework
